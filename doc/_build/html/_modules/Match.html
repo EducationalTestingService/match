@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Match &mdash; match 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="match 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">match 0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for Match</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">regex</span> <span class="kn">as</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">nltk.metrics.distance</span> <span class="kn">import</span> <span class="n">edit_distance</span>
+
+
+<div class="viewcode-block" id="match_lines"><a class="viewcode-back" href="../match.html#Match.match_lines">[docs]</a><span class="k">def</span> <span class="nf">match_lines</span><span class="p">(</span><span class="n">original_text</span><span class="p">,</span> <span class="n">things_to_match</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param original_text: ``str``/``Unicode`` containing the original text to get offsets within</span>
+<span class="sd">    :param things_to_match: ``list(words/phrases)`` whose offsets we wish to find within ``original_text``.</span>
+
+<span class="sd">    If ``things_to_match`` is a list of tokenized strings, each element of ``things_to_match`` is expected to be a ``list`` of tokens.</span>
+<span class="sd">    For example::</span>
+
+<span class="sd">        [[&quot;Hello&quot;, &quot;,&quot;, &quot;world&quot;, &quot;!&quot;], [&quot;That&quot;, &quot;was&quot;, &quot;the&quot;, &quot;first&quot;, &quot;sentence&quot;, &quot;;&quot;, &quot;here&quot;, &quot;is&quot;, &quot;the&quot;, &quot;second&quot;, &quot;.&quot;]]</span>
+
+<span class="sd">    ``things_to_match`` could also be::</span>
+
+<span class="sd">        [&quot;cat&quot;, &quot;dog&quot;, &quot;octopus&quot;]</span>
+
+<span class="sd">    or even a mix of the two.  This function will call :mod:`sourcerater.util.Match.match()` on each element of ``things_to_match``.</span>
+
+<span class="sd">    :returns: ``sorted(set([(start, end, word/phrase) for word/phrase in things_to_match]))`` for ALL occurrences of each word/phrase in ``things_to_match``.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">matched_lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">unique_things_to_match</span> <span class="o">=</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">things_to_match</span><span class="p">)</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">things_to_match</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span> <span class="k">else</span> <span class="n">things_to_match</span><span class="p">)</span>
+    
+    <span class="n">without_smart_quotes</span> <span class="o">=</span> <span class="n">_cleanup_text</span><span class="p">(</span><span class="n">original_text</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">unique_things_to_match</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="n">match</span><span class="p">(</span><span class="n">original_text</span><span class="p">,</span> <span class="n">thing</span><span class="p">,</span> <span class="n">clean_text</span><span class="o">=</span><span class="n">without_smart_quotes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">matches</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">thing</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">matched_lines</span> <span class="o">+=</span> <span class="n">matches</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">matched_lines</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="match"><a class="viewcode-back" href="../match.html#Match.match">[docs]</a><span class="k">def</span> <span class="nf">match</span><span class="p">(</span><span class="n">original_text</span><span class="p">,</span> <span class="n">word_or_token_list_to_match</span><span class="p">,</span> <span class="n">clean_text</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param original_text: ``str``/``Unicode`` containing the original text to get offsets within</span>
+<span class="sd">    :param word_or_token_list_to_match: Either a single ``str``/``Unicode`` corresponding to a single token we want offsets for, or a ``list(str)`` corresponding to a phrase/sentence we want offsets for.</span>
+<span class="sd">    :param clean_text: If ``None``, this function will do some preliminary cleaning of ``original_text`` to better facilitate the matching process (replacing strange quotation marks with ASCII ones, etc.).  This is a one-to-one process; a single character simply becomes a different single character, so as to not throw off the offsets of ``word_or_token_list_to_match`` within ``original_text``.  It&#39;s just that ``word_or_token_to_match`` will probably not match against a text with non-ASCII characters in it, especially if those characters are Windows &quot;smart&quot; quotes.</span>
+
+<span class="sd">    :returns: ``sorted([(start, end, word/phrase)])`` where each ``tuple`` contains a unique occurrence of ``word_or_token_list_to_match`` in ``original_text``, and the word/phrase is what is contained within ``original_text`` at that ``start``/``end`` offset pair.</span>
+
+<span class="sd">    **How This Works**</span>
+
+<span class="sd">    Much of this hinges on the existance of ``finditer()`` in Python&#39;s ``regex`` module.  We use a list </span>
+<span class="sd">    comprehension to generate a ``list`` of ``(m.start(), m.end(), original_text[m.start():m.end()])``</span>
+<span class="sd">    tuples for each match ``m`` returned by ``finditer()``.</span>
+
+<span class="sd">    When where we&#39;re interested in all occurrences of a single token, for example &quot;dog&quot;, we</span>
+<span class="sd">    simply call ``regex.finditer(r&#39;\bdog\b&#39;, original_text, regex.U | regex.I)``.  When where </span>
+<span class="sd">    we&#39;re interested in a sentence or phrase like &quot;Dogs make great pets.&quot;, things are not so </span>
+<span class="sd">    straightforward.</span>
+
+<span class="sd">    In this case, it is useful to perform some cleanup of ``original_text``, as described above.  This is very</span>
+<span class="sd">    helpful because tokenization normalizes any non-ASCII characters to ASCII equivalents.  We do the same here,</span>
+<span class="sd">    being careful not to expand any single character into multiple ones; that will throw off the offsets, since</span>
+<span class="sd">    we are not interested in the offsets from ``clean_text``, which the user will never see, but in ``original_text``,</span>
+<span class="sd">    which the user submitted.</span>
+
+<span class="sd">    This sentence/phrase matching was tested on a set of 200 randomly-selected essays from GRE and TOEFL (200</span>
+<span class="sd">    each) from 2011-2012 with complete disregard to score.  Each essay was sentence- and word-tokenized, and</span>
+<span class="sd">    each word-tokenized sentence was passed to this function along with its essay.  From this, I determined</span>
+<span class="sd">    that the following two strategies are necessary in order to get the offsets for any tokenized string.</span>
+
+<span class="sd">    **First**, we simply reverse tokenization on the string ``&quot; &quot;.join([&quot;Dogs&quot;, &quot;make&quot;, &quot;great&quot;, &quot;pets&quot;, &quot;.&quot;])``</span>
+<span class="sd">    and try to find it directly in ``original_text`` using ``finditer()``.  For the test set described</span>
+<span class="sd">    above, 94.3% of the sentences from the GRE essays and 91.9% of the sentences from the TOEFL essays</span>
+<span class="sd">    returned the correct match and offsets within the original essay using just this strategy alone.</span>
+
+<span class="sd">    For the remaining 6.7% and 9.1% of sentences, respectively, a **second** and more time-consuming</span>
+<span class="sd">    method is necessary.</span>
+
+<span class="sd">    1. Use ``finditer()`` on ``&quot;\s*&quot;.join([&quot;Dogs&quot;, &quot;make&quot;, &quot;great&quot;, &quot;pets&quot;, &quot;.&quot;])``.  This works particularly well for essays because many candidates accidentally insert more whitespace characters than necessary, and toksent and expunct do an excellent job of removing the excess spaces.  However, our offsets need to include those spaces.  Should this fail:</span>
+<span class="sd">    2. Use Levenshtein edit distance, as implemented in ``nltk.metrics.distance.edit_distance()``.  For each attempt with edit distance, we extract all strings that start with the same token as the one we&#39;re looking for (&quot;Dogs&quot; in this example) that have the same number of characters (as &quot;Dogs make great pets.&quot;), and return the one with the lowest edit distance to the search string.</span>
+
+
+<span class="sd">    We&#39;ll try (2) against the original text and our untokenized version from before, and if that fails, </span>
+<span class="sd">    we try edit distance again against the original text and ``&quot; &quot;.join([&quot;Dogs&quot;, &quot;make&quot;, &quot;great&quot;, &quot;pets&quot;, &quot;.&quot;])``.</span>
+<span class="sd">    Even if the search string is not in the original text, we&#39;ll return the offsets of the string</span>
+<span class="sd">    with the lowest edit distance within the original text.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">word_or_token_list_to_match</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">clean_text</span><span class="p">):</span>
+        <span class="n">clean_text</span> <span class="o">=</span> <span class="n">_cleanup_text</span><span class="p">(</span><span class="n">original_text</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">word_or_token_list_to_match</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">to_match</span> <span class="o">=</span> <span class="n">untokenize</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">word_or_token_list_to_match</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="p">[(</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">original_text</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">():</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()])</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">to_match</span><span class="p">,</span> <span class="n">clean_text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">U</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="p">[(</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">original_text</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">():</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()])</span> 
+                       <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="s">&quot;\s*&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">word_or_token_list_to_match</span><span class="p">),</span> <span class="n">original_text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">U</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">edit_distance_match</span> <span class="o">=</span> <span class="n">_match_by_edit_distance</span><span class="p">(</span><span class="n">original_text</span><span class="p">,</span> <span class="n">to_match</span><span class="p">)</span>
+                <span class="n">matches</span> <span class="o">=</span> <span class="p">[(</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">original_text</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">():</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()])</span> 
+                           <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">edit_distance_match</span><span class="p">),</span> <span class="n">original_text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">U</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">edit_distance_match</span> <span class="o">=</span> <span class="n">_match_by_edit_distance</span><span class="p">(</span><span class="n">original_text</span><span class="p">,</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">word_or_token_list_to_match</span><span class="p">))</span>
+                    <span class="n">matches</span> <span class="o">=</span> <span class="p">[(</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">original_text</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">():</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()])</span> 
+                               <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">edit_distance_match</span><span class="p">),</span> <span class="n">original_text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">U</span><span class="p">)]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">edit_distance_match</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="p">[(</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">original_text</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">():</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()])</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span> <span class="o">+</span> <span class="n">word_or_token_list_to_match</span> <span class="o">+</span> <span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="n">clean_text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">U</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="untokenize"><a class="viewcode-back" href="../match.html#Match.untokenize">[docs]</a><span class="k">def</span> <span class="nf">untokenize</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Based on https://github.com/commonsense/simplenlp/blob/master/simplenlp/euro.py#L132</span>
+<span class="sd">    </span>
+<span class="sd">    :param text: A single ``str``/``Unicode`` containing the sentence (well, might work on any arbitrary text) you&#39;d like to untokenize.</span>
+<span class="sd">    :returns: A UTF8-encoded, regular expression-friendly, untokenized version of ``text``.</span>
+
+<span class="sd">    .. seealso:: https://github.com/EducationalTestingService/stanford-thrift/blob/master/README_tokenizer.md which isn&#39;t actually used here (much slower than this approach)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf8&#39;</span><span class="p">)</span>
+
+    <span class="n">step1</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;`` &quot;</span><span class="p">,</span> <span class="s">&#39;&quot; *&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot; &#39;&#39;&quot;</span><span class="p">,</span> <span class="s">&#39;&quot; *&#39;</span><span class="p">)</span>
+    <span class="n">step2</span> <span class="o">=</span> <span class="n">step1</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot; -LRB- &quot;</span><span class="p">,</span> <span class="s">&quot; [\[\(]&quot;</span><span class="p">)</span>
+    <span class="n">step2</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39; -RRB- ?&#39;</span><span class="p">,</span> <span class="s">r&quot;[\]\)] &quot;</span><span class="p">,</span> <span class="n">step2</span><span class="p">)</span>
+
+    <span class="n">step3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39; ([.,:;?!%]+)([ </span><span class="se">\&#39;</span><span class="s">&quot;`\*])&#39;</span><span class="p">,</span> <span class="s">r&quot;\1\2&quot;</span><span class="p">,</span> <span class="n">step2</span><span class="p">)</span>
+    <span class="n">step4</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39; ([.,:;?!%]+)$&#39;</span><span class="p">,</span> <span class="s">r&#39; *</span><span class="se">\\</span><span class="s">&#39;</span> <span class="o">+</span> <span class="s">r&quot;\1&quot;</span><span class="p">,</span> <span class="n">step3</span><span class="p">)</span>
+
+    <span class="n">step5</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&quot; &#39;&quot;</span><span class="p">,</span> <span class="s">r&quot;&#39;&quot;</span><span class="p">,</span> <span class="n">step4</span><span class="p">)</span>
+    <span class="n">step5</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&quot; n&#39;t&quot;</span><span class="p">,</span> <span class="s">r&quot;n&#39;t&quot;</span><span class="p">,</span> <span class="n">step5</span><span class="p">)</span>
+    <span class="n">step5</span> <span class="o">=</span> <span class="n">step5</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;can not&quot;</span><span class="p">,</span> <span class="s">&quot;cannot&quot;</span><span class="p">)</span>
+
+    <span class="n">step6</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;( *)` &#39;</span><span class="p">,</span> <span class="s">r&quot;\1&#39;&quot;</span><span class="p">,</span> <span class="n">step5</span><span class="p">)</span>
+
+    <span class="n">step7</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\.\.\. *&#39;</span><span class="p">,</span> <span class="s">r&#39;[\.…]{1,3}&#39;</span><span class="p">,</span> <span class="n">step6</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">U</span><span class="p">)</span>
+    <span class="n">step7</span> <span class="o">=</span> <span class="n">step7</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="n">step8</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39; \*$&#39;</span><span class="p">,</span> <span class="s">r&#39;&#39;</span><span class="p">,</span> <span class="n">step7</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">step8</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&quot;utf8&quot;</span><span class="p">)</span>
+
+</div>
+<span class="k">def</span> <span class="nf">_cleanup_text</span><span class="p">(</span><span class="n">original_text</span><span class="p">):</span>
+    <span class="n">cleaned</span> <span class="o">=</span> <span class="n">original_text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&quot;utf8&quot;</span><span class="p">)</span>
+    <span class="c"># Borrowed from toksent; added more weird quotation marks because they weren&#39;t matching w/ the Unicode codes</span>
+    <span class="n">non_ascii</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s">&#39;’&#39;</span><span class="p">,</span> <span class="s">&quot;&#39;&quot;</span><span class="p">),</span> <span class="c"># ?</span>
+        <span class="p">(</span><span class="s">&#39;“&#39;</span><span class="p">,</span> <span class="s">&#39;&quot;&#39;</span><span class="p">),</span> <span class="c"># ?</span>
+        <span class="p">(</span><span class="s">&#39;”&#39;</span><span class="p">,</span> <span class="s">&#39;&quot;&#39;</span><span class="p">),</span> <span class="c"># ?</span>
+        <span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">),</span> <span class="c"># mystery space</span>
+        <span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">),</span> <span class="c"># newlines</span>
+        <span class="p">(</span><span class="s">&quot;</span><span class="se">\u2018</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&#39;&quot;</span><span class="p">),</span> <span class="c"># left single quotation mark</span>
+        <span class="p">(</span><span class="s">&quot;</span><span class="se">\u2019</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&#39;&quot;</span><span class="p">),</span> <span class="c"># right single quotation mark</span>
+        <span class="p">(</span><span class="s">&quot;</span><span class="se">\u201c</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&#39;&quot;&#39;</span><span class="p">),</span> <span class="c"># left double quotation mark</span>
+        <span class="p">(</span><span class="s">&quot;</span><span class="se">\u201d</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&#39;&quot;&#39;</span><span class="p">),</span> <span class="c"># right double quotation mark</span>
+        <span class="p">(</span><span class="s">&quot;</span><span class="se">\u2013</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;-&quot;</span><span class="p">),</span> <span class="c"># en dash</span>
+        <span class="p">(</span><span class="s">&quot;</span><span class="se">\u00a0</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot; &quot;</span><span class="p">)]</span> <span class="c"># no-break space</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">unicode_char</span><span class="p">,</span> <span class="n">ascii_char</span><span class="p">)</span> <span class="ow">in</span> <span class="n">non_ascii</span><span class="p">:</span>
+        <span class="n">cleaned</span> <span class="o">=</span> <span class="n">cleaned</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">unicode_char</span><span class="p">,</span> <span class="n">ascii_char</span><span class="p">)</span>
+    <span class="n">cleaned</span> <span class="o">=</span> <span class="n">cleaned</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&quot;utf8&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cleaned</span>
+
+
+<span class="k">def</span> <span class="nf">_match_by_edit_distance</span><span class="p">(</span><span class="n">original_text</span><span class="p">,</span> <span class="n">text_to_match</span><span class="p">):</span>
+    <span class="n">potential_matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">original_text</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">():</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">text_to_match</span><span class="p">)]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> 
+                         <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text_to_match</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">text_to_match</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)],</span> <span class="n">original_text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">U</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">potential_matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># No idea why this would ever happen, but it does</span>
+        <span class="k">return</span> <span class="n">text_to_match</span>
+
+    <span class="n">match_with_lowest_edit_distance</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="n">lowest_edit_distance</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">potential_matches</span><span class="p">:</span>
+        <span class="n">e_d</span> <span class="o">=</span> <span class="n">edit_distance</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">text_to_match</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lowest_edit_distance</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">e_d</span> <span class="o">&lt;</span> <span class="n">lowest_edit_distance</span><span class="p">:</span>
+            <span class="n">lowest_edit_distance</span> <span class="o">=</span> <span class="n">e_d</span>
+            <span class="n">match_with_lowest_edit_distance</span> <span class="o">=</span> <span class="n">match</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">match_with_lowest_edit_distance</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">text_to_match</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">result</span><span class="o">.</span><span class="n">rindex</span><span class="p">(</span><span class="n">text_to_match</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">match 0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Diane M. Napolitano.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

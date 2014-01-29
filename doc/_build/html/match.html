@@ -1,0 +1,226 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>match Package &mdash; match 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="match 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Welcome to match’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to match’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">match 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="match-package">
+<h1>match Package<a class="headerlink" href="#match-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-Match">
+<span id="match-module"></span><h2><a class="reference internal" href="#module-Match" title="Match"><tt class="xref py py-mod docutils literal"><span class="pre">Match</span></tt></a> Module<a class="headerlink" href="#module-Match" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="Match.match">
+<tt class="descclassname">Match.</tt><tt class="descname">match</tt><big>(</big><em>original_text</em>, <em>word_or_token_list_to_match</em>, <em>clean_text=None</em><big>)</big><a class="reference internal" href="_modules/Match.html#match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Match.match" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>original_text</strong> &#8211; <tt class="docutils literal"><span class="pre">str</span></tt>/<tt class="docutils literal"><span class="pre">Unicode</span></tt> containing the original text to get offsets within</li>
+<li><strong>word_or_token_list_to_match</strong> &#8211; Either a single <tt class="docutils literal"><span class="pre">str</span></tt>/<tt class="docutils literal"><span class="pre">Unicode</span></tt> corresponding to a single token we want offsets for, or a <tt class="docutils literal"><span class="pre">list(str)</span></tt> corresponding to a phrase/sentence we want offsets for.</li>
+<li><strong>clean_text</strong> &#8211; If <tt class="docutils literal"><span class="pre">None</span></tt>, this function will do some preliminary cleaning of <tt class="docutils literal"><span class="pre">original_text</span></tt> to better facilitate the matching process (replacing strange quotation marks with ASCII ones, etc.).  This is a one-to-one process; a single character simply becomes a different single character, so as to not throw off the offsets of <tt class="docutils literal"><span class="pre">word_or_token_list_to_match</span></tt> within <tt class="docutils literal"><span class="pre">original_text</span></tt>.  It&#8217;s just that <tt class="docutils literal"><span class="pre">word_or_token_to_match</span></tt> will probably not match against a text with non-ASCII characters in it, especially if those characters are Windows &#8220;smart&#8221; quotes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">sorted([(start,</span> <span class="pre">end,</span> <span class="pre">word/phrase)])</span></tt> where each <tt class="docutils literal"><span class="pre">tuple</span></tt> contains a unique occurrence of <tt class="docutils literal"><span class="pre">word_or_token_list_to_match</span></tt> in <tt class="docutils literal"><span class="pre">original_text</span></tt>, and the word/phrase is what is contained within <tt class="docutils literal"><span class="pre">original_text</span></tt> at that <tt class="docutils literal"><span class="pre">start</span></tt>/<tt class="docutils literal"><span class="pre">end</span></tt> offset pair.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>How This Works</strong></p>
+<p>Much of this hinges on the existance of <tt class="docutils literal"><span class="pre">finditer()</span></tt> in Python&#8217;s <tt class="docutils literal"><span class="pre">regex</span></tt> module.  We use a list 
+comprehension to generate a <tt class="docutils literal"><span class="pre">list</span></tt> of <tt class="docutils literal"><span class="pre">(m.start(),</span> <span class="pre">m.end(),</span> <span class="pre">original_text[m.start():m.end()])</span></tt>
+tuples for each match <tt class="docutils literal"><span class="pre">m</span></tt> returned by <tt class="docutils literal"><span class="pre">finditer()</span></tt>.</p>
+<p>When where we&#8217;re interested in all occurrences of a single token, for example &#8220;dog&#8221;, we
+simply call <tt class="docutils literal"><span class="pre">regex.finditer(r'dog',</span> <span class="pre">original_text,</span> <span class="pre">regex.U</span> <span class="pre">|</span> <span class="pre">regex.I)</span></tt>.  When where 
+we&#8217;re interested in a sentence or phrase like &#8220;Dogs make great pets.&#8221;, things are not so 
+straightforward.</p>
+<p>In this case, it is useful to perform some cleanup of <tt class="docutils literal"><span class="pre">original_text</span></tt>, as described above.  This is very
+helpful because tokenization normalizes any non-ASCII characters to ASCII equivalents.  We do the same here,
+being careful not to expand any single character into multiple ones; that will throw off the offsets, since
+we are not interested in the offsets from <tt class="docutils literal"><span class="pre">clean_text</span></tt>, which the user will never see, but in <tt class="docutils literal"><span class="pre">original_text</span></tt>,
+which the user submitted.</p>
+<p>This sentence/phrase matching was tested on a set of 200 randomly-selected essays from GRE and TOEFL (200
+each) from 2011-2012 with complete disregard to score.  Each essay was sentence- and word-tokenized, and
+each word-tokenized sentence was passed to this function along with its essay.  From this, I determined
+that the following two strategies are necessary in order to get the offsets for any tokenized string.</p>
+<p><strong>First</strong>, we simply reverse tokenization on the string <tt class="docutils literal"><span class="pre">&quot;</span> <span class="pre">&quot;.join([&quot;Dogs&quot;,</span> <span class="pre">&quot;make&quot;,</span> <span class="pre">&quot;great&quot;,</span> <span class="pre">&quot;pets&quot;,</span> <span class="pre">&quot;.&quot;])</span></tt>
+and try to find it directly in <tt class="docutils literal"><span class="pre">original_text</span></tt> using <tt class="docutils literal"><span class="pre">finditer()</span></tt>.  For the test set described
+above, 94.3% of the sentences from the GRE essays and 91.9% of the sentences from the TOEFL essays
+returned the correct match and offsets within the original essay using just this strategy alone.</p>
+<p>For the remaining 6.7% and 9.1% of sentences, respectively, a <strong>second</strong> and more time-consuming
+method is necessary.</p>
+<ol class="arabic simple">
+<li>Use <tt class="docutils literal"><span class="pre">finditer()</span></tt> on <tt class="docutils literal"><span class="pre">&quot;\s*&quot;.join([&quot;Dogs&quot;,</span> <span class="pre">&quot;make&quot;,</span> <span class="pre">&quot;great&quot;,</span> <span class="pre">&quot;pets&quot;,</span> <span class="pre">&quot;.&quot;])</span></tt>.  This works particularly well for essays because many candidates accidentally insert more whitespace characters than necessary, and toksent and expunct do an excellent job of removing the excess spaces.  However, our offsets need to include those spaces.  Should this fail:</li>
+<li>Use Levenshtein edit distance, as implemented in <tt class="docutils literal"><span class="pre">nltk.metrics.distance.edit_distance()</span></tt>.  For each attempt with edit distance, we extract all strings that start with the same token as the one we&#8217;re looking for (&#8220;Dogs&#8221; in this example) that have the same number of characters (as &#8220;Dogs make great pets.&#8221;), and return the one with the lowest edit distance to the search string.</li>
+</ol>
+<p>We&#8217;ll try (2) against the original text and our untokenized version from before, and if that fails, 
+we try edit distance again against the original text and <tt class="docutils literal"><span class="pre">&quot;</span> <span class="pre">&quot;.join([&quot;Dogs&quot;,</span> <span class="pre">&quot;make&quot;,</span> <span class="pre">&quot;great&quot;,</span> <span class="pre">&quot;pets&quot;,</span> <span class="pre">&quot;.&quot;])</span></tt>.
+Even if the search string is not in the original text, we&#8217;ll return the offsets of the string
+with the lowest edit distance within the original text.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Match.match_lines">
+<tt class="descclassname">Match.</tt><tt class="descname">match_lines</tt><big>(</big><em>original_text</em>, <em>things_to_match</em><big>)</big><a class="reference internal" href="_modules/Match.html#match_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Match.match_lines" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>original_text</strong> &#8211; <tt class="docutils literal"><span class="pre">str</span></tt>/<tt class="docutils literal"><span class="pre">Unicode</span></tt> containing the original text to get offsets within</li>
+<li><strong>things_to_match</strong> &#8211; <tt class="docutils literal"><span class="pre">list(words/phrases)</span></tt> whose offsets we wish to find within <tt class="docutils literal"><span class="pre">original_text</span></tt>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>If <tt class="docutils literal"><span class="pre">things_to_match</span></tt> is a list of tokenized strings, each element of <tt class="docutils literal"><span class="pre">things_to_match</span></tt> is expected to be a <tt class="docutils literal"><span class="pre">list</span></tt> of tokens.
+For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[[</span><span class="s">&quot;Hello&quot;</span><span class="p">,</span> <span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="s">&quot;world&quot;</span><span class="p">,</span> <span class="s">&quot;!&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s">&quot;That&quot;</span><span class="p">,</span> <span class="s">&quot;was&quot;</span><span class="p">,</span> <span class="s">&quot;the&quot;</span><span class="p">,</span> <span class="s">&quot;first&quot;</span><span class="p">,</span> <span class="s">&quot;sentence&quot;</span><span class="p">,</span> <span class="s">&quot;;&quot;</span><span class="p">,</span> <span class="s">&quot;here&quot;</span><span class="p">,</span> <span class="s">&quot;is&quot;</span><span class="p">,</span> <span class="s">&quot;the&quot;</span><span class="p">,</span> <span class="s">&quot;second&quot;</span><span class="p">,</span> <span class="s">&quot;.&quot;</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">things_to_match</span></tt> could also be:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="s">&quot;cat&quot;</span><span class="p">,</span> <span class="s">&quot;dog&quot;</span><span class="p">,</span> <span class="s">&quot;octopus&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>or even a mix of the two.  This function will call <tt class="xref py py-mod docutils literal"><span class="pre">sourcerater.util.Match.match()</span></tt> on each element of <tt class="docutils literal"><span class="pre">things_to_match</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><tt class="docutils literal"><span class="pre">sorted(set([(start,</span> <span class="pre">end,</span> <span class="pre">word/phrase)</span> <span class="pre">for</span> <span class="pre">word/phrase</span> <span class="pre">in</span> <span class="pre">things_to_match]))</span></tt> for ALL occurrences of each word/phrase in <tt class="docutils literal"><span class="pre">things_to_match</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Match.untokenize">
+<tt class="descclassname">Match.</tt><tt class="descname">untokenize</tt><big>(</big><em>text</em><big>)</big><a class="reference internal" href="_modules/Match.html#untokenize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Match.untokenize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Based on <a class="reference external" href="https://github.com/commonsense/simplenlp/blob/master/simplenlp/euro.py#L132">https://github.com/commonsense/simplenlp/blob/master/simplenlp/euro.py#L132</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> &#8211; A single <tt class="docutils literal"><span class="pre">str</span></tt>/<tt class="docutils literal"><span class="pre">Unicode</span></tt> containing the sentence (well, might work on any arbitrary text) you&#8217;d like to untokenize.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A UTF8-encoded, regular expression-friendly, untokenized version of <tt class="docutils literal"><span class="pre">text</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="https://github.com/EducationalTestingService/stanford-thrift/blob/master/README_tokenizer.md">https://github.com/EducationalTestingService/stanford-thrift/blob/master/README_tokenizer.md</a> which isn&#8217;t actually used here (much slower than this approach)</p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">match Package</a><ul>
+<li><a class="reference internal" href="#module-Match"><tt class="docutils literal"><span class="pre">Match</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to match&#8217;s documentation!</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/match.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to match’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">match 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Diane M. Napolitano.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
