@@ -99,19 +99,19 @@ def match(original_text, word_or_token_list_to_match, clean_text=None):
         clean_text = _cleanup_text(original_text)
 
     if type(word_or_token_list_to_match) is list:
-        to_match = untokenize(" ".join(word_or_token_list_to_match).strip())
-        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(to_match, clean_text, re.U)]
+        to_match = untokenize("\s+".join(word_or_token_list_to_match).strip())
+        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(to_match, clean_text, re.U | re.I)]
         if len(matches) == 0:
             matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
-                       for m in re.finditer("\s*".join(word_or_token_list_to_match), original_text, re.U)]
+                       for m in re.finditer("\s*".join(word_or_token_list_to_match), original_text, re.U) | re.I]
             if len(matches) == 0:
                 edit_distance_match = _match_by_edit_distance(original_text, to_match)
                 matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
-                           for m in re.finditer(re.escape(edit_distance_match), original_text, re.U)]
+                           for m in re.finditer(re.escape(edit_distance_match), original_text, re.U | re.I)]
                 if len(matches) == 0:
                     edit_distance_match = _match_by_edit_distance(original_text, " ".join(word_or_token_list_to_match))
                     matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
-                               for m in re.finditer(re.escape(edit_distance_match), original_text, re.U)]
+                               for m in re.finditer(re.escape(edit_distance_match), original_text, re.U | re.I)]
                     if len(matches) == 0:
                         return edit_distance_match
     else:
@@ -154,7 +154,8 @@ def untokenize(text):
 
 def _cleanup_text(original_text):
     cleaned = original_text.encode("utf8")
-    # Borrowed from toksent; added more weird quotation marks because they weren't matching w/ the Unicode codes
+    # Borrowed from code by Dan Blanchard; 
+    # added more weird quotation marks because they weren't matching w/ the Unicode codes
     non_ascii = [
         ('’', "'"), # ?
         ('“', '"'), # ?
