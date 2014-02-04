@@ -139,8 +139,10 @@ def untokenize(text):
     step2 = step2.replace(b" -LRB- ", b" [\[\(]")
     step2 = re.sub(r' -RRB- ?', r"[\]\)] ", step2)
 
-    step3 = re.sub(r' ([.,:;?!%]+)([ \'"`\*])', r"\1\2", step2)
-    step4 = re.sub(r' ([.,:;?!%]+)$', r' *\\' + r"\1", step3)
+    step2a = re.sub(r'\.\.\. *', r'[\.…]{1,3}', step2, re.U)
+
+    step3 = re.sub(r' ([.,:;?!%]+)([ \'"`\*])', r"\1\2", step2a)
+    step4 = re.sub(r' ([,:;?!%]+)$', r'\s*\\' + r"\1", step3)
 
     step5 = re.sub(r" '", r"'", step4)
     step5 = re.sub(r" n't", r"n't", step5)
@@ -148,8 +150,7 @@ def untokenize(text):
 
     step6 = re.sub(r'( *)` ', r"\1'", step5)
 
-    step7 = re.sub(r'\.\.\. *', r'[\.…]{1,3}', step6, re.U)
-    step7 = step7.strip()
+    step7 = step6.strip()
 
     step8 = re.sub(r' \*$', r'', step7)
     
@@ -175,14 +176,8 @@ def _cleanup_text(original_text):
         (b"\u201d", b'"'), # right double quotation mark
         (b"\u2013", b"-"), # en dash
         (b"\u00a0", b" ")] # no-break space
-    #try:
     for (unicode_char, ascii_char) in non_ascii:
         cleaned = cleaned.replace(unicode_char, ascii_char)
-        #cleaned = re.sub(unicode_char, ascii_char, cleaned, re.U)
-    #except:
-    #    print(cleaned)
-    #    import sys
-    #    sys.exit()
     cleaned = cleaned.decode("utf8")
     return cleaned
 
