@@ -92,6 +92,8 @@ def match(original_text, word_or_token_list_to_match, clean_text=None):
     with the lowest edit distance within the original text.
     '''
 
+    regex_flags = re.U | re.I
+
     if len(word_or_token_list_to_match) == 0:
         return []
 
@@ -99,23 +101,23 @@ def match(original_text, word_or_token_list_to_match, clean_text=None):
         clean_text = _cleanup_text(original_text)
 
     if type(word_or_token_list_to_match) is list:
-        to_match = untokenize("\s+".join(word_or_token_list_to_match).strip())
-        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(to_match, clean_text, re.U | re.I)]
+        to_match = untokenize(" ".join(word_or_token_list_to_match).strip())
+        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(to_match, clean_text, regex_flags)]
         if len(matches) == 0:
             matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
-                       for m in re.finditer("\s*".join(word_or_token_list_to_match), original_text, re.U) | re.I]
+                       for m in re.finditer("\s*".join(re.escape(w) for w in word_or_token_list_to_match), original_text, regex_flags)]
             if len(matches) == 0:
-                edit_distance_match = _match_by_edit_distance(original_text, to_match)
+                edit_distance_match = _match_by_edit_distance(original_text, to_match.replace(b"\s+", b" "))
                 matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
-                           for m in re.finditer(re.escape(edit_distance_match), original_text, re.U | re.I)]
+                           for m in re.finditer(re.escape(edit_distance_match), original_text, regex_flags)]
                 if len(matches) == 0:
                     edit_distance_match = _match_by_edit_distance(original_text, " ".join(word_or_token_list_to_match))
                     matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
-                               for m in re.finditer(re.escape(edit_distance_match), original_text, re.U | re.I)]
+                               for m in re.finditer(re.escape(edit_distance_match), original_text, regex_flags)]
                     if len(matches) == 0:
                         return edit_distance_match
     else:
-        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(r'\b' + word_or_token_list_to_match + r'\b', clean_text, re.U | re.I)]
+        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(r'\b' + word_or_token_list_to_match + r'\b', clean_text, regex_flags)]
 
     return sorted(matches)
 
@@ -131,8 +133,10 @@ def untokenize(text):
     '''
     text = text.encode('utf8')
 
-    step1 = text.replace("`` ", '" *').replace(" ''", '" *')
-    step2 = step1.replace(" -LRB- ", " [\[\(]")
+    step1 = re.sub(r'([\*\?])', r'\\\\\1', text.decode("utf8"), re.U)
+ 
+    step2 = step1.replace(b"`` ", b'"\s*').replace(b" ''", b'"\s*')
+    step2 = step2.replace(b" -LRB- ", b" [\[\(]")
     step2 = re.sub(r' -RRB- ?', r"[\]\)] ", step2)
 
     step3 = re.sub(r' ([.,:;?!%]+)([ \'"`\*])', r"\1\2", step2)
@@ -140,7 +144,7 @@ def untokenize(text):
 
     step5 = re.sub(r" '", r"'", step4)
     step5 = re.sub(r" n't", r"n't", step5)
-    step5 = step5.replace("can not", "cannot")
+    step5 = step5.replace(b"can not", b"cannot")
 
     step6 = re.sub(r'( *)` ', r"\1'", step5)
 
@@ -148,8 +152,11 @@ def untokenize(text):
     step7 = step7.strip()
 
     step8 = re.sub(r' \*$', r'', step7)
+    
+    step9 = re.sub(r' ([^\\\*\+])', r'\s+\1', step8)
+    step9 = re.sub(r'\\s[\+\*]$', r'', step9)
 
-    return step8.decode("utf8")
+    return step9
 
 
 def _cleanup_text(original_text):
@@ -157,26 +164,32 @@ def _cleanup_text(original_text):
     # Borrowed from code by Dan Blanchard; 
     # added more weird quotation marks because they weren't matching w/ the Unicode codes
     non_ascii = [
-        ('’', "'"), # ?
-        ('“', '"'), # ?
-        ('”', '"'), # ?
-        (' ', ' '), # mystery space
-        ("\n", ' '), # newlines
-        ("\u2018", "'"), # left single quotation mark
-        ("\u2019", "'"), # right single quotation mark
-        ("\u201c", '"'), # left double quotation mark
-        ("\u201d", '"'), # right double quotation mark
-        ("\u2013", "-"), # en dash
-        ("\u00a0", " ")] # no-break space
+        (b'’', b"'"), # ?
+        (b'“', b'"'), # ?
+        (b'”', b'"'), # ?
+        (b' ', b' '), # mystery space
+        (b"\n", b' '), # newlines
+        (b"\u2018", b"'"), # left single quotation mark
+        (b"\u2019", b"'"), # right single quotation mark
+        (b"\u201c", b'"'), # left double quotation mark
+        (b"\u201d", b'"'), # right double quotation mark
+        (b"\u2013", b"-"), # en dash
+        (b"\u00a0", b" ")] # no-break space
+    #try:
     for (unicode_char, ascii_char) in non_ascii:
         cleaned = cleaned.replace(unicode_char, ascii_char)
+        #cleaned = re.sub(unicode_char, ascii_char, cleaned, re.U)
+    #except:
+    #    print(cleaned)
+    #    import sys
+    #    sys.exit()
     cleaned = cleaned.decode("utf8")
     return cleaned
 
 
 def _match_by_edit_distance(original_text, text_to_match):
     potential_matches = [original_text[m.start():m.start()+len(text_to_match)] for m in 
-                         re.finditer(text_to_match[0:text_to_match.index(" ")], original_text, re.U)]
+                         re.finditer(text_to_match[0:text_to_match.index(b" ")], original_text, re.U)]
 
     if len(potential_matches) == 0:
         # No idea why this would ever happen, but it does
