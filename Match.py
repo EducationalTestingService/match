@@ -107,7 +107,7 @@ def match(original_text, word_or_token_list_to_match, clean_text=None):
             matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
                        for m in re.finditer("\s*".join(re.escape(w) for w in word_or_token_list_to_match), original_text, regex_flags)]
             if len(matches) == 0:
-                edit_distance_match = _match_by_edit_distance(original_text, to_match.replace(b"\s+", b" "))
+                edit_distance_match = _match_by_edit_distance(original_text, re.sub(r'\\s[\*\+]', r' ', to_match))
                 matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
                            for m in re.finditer(re.escape(edit_distance_match), original_text, regex_flags)]
                 if len(matches) == 0:
@@ -183,8 +183,12 @@ def _cleanup_text(original_text):
 
 
 def _match_by_edit_distance(original_text, text_to_match):
-    potential_matches = [original_text[m.start():m.start()+len(text_to_match)] for m in 
+    potential_matches = [original_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
                          re.finditer(text_to_match[0:text_to_match.index(b" ")], original_text, re.U)]
+    potential_matches = [(p[0:p.rindex(text_to_match[-1])+1] 
+                          if text_to_match[-1] in p and len(p) > len(text_to_match)
+                          else p)
+                         for p in potential_matches]
 
     if len(potential_matches) == 0:
         # No idea why this would ever happen, but it does
@@ -200,5 +204,10 @@ def _match_by_edit_distance(original_text, text_to_match):
 
     result = match_with_lowest_edit_distance.strip()
     if text_to_match[-1] in result:
-        return result[0:result.rindex(text_to_match[-1])+1]
+        while result[-1] != text_to_match[-1]:
+            result = result[0:-1]
+    elif text_to_match[-1] not in [']', '}'] and text_to_match[-2:] != "..":
+        while result[-1] != text_to_match[-1]:
+            result += original_text[original_text.index(result) + len(result)][-1]
+
     return result
