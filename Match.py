@@ -183,8 +183,16 @@ def _cleanup_text(original_text):
 
 
 def _match_by_edit_distance(original_text, text_to_match):
+    text_to_match = text_to_match.replace("-LRB-", "(").replace("-RRB-", ")")
+    text_to_match = text_to_match.replace("-LCB-", "{").replace("-RCB-", "}")
+    text_to_match = re.sub(r'\[\\\]\\\)\]$', ')', text_to_match)
+
     potential_matches = [original_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
-                         re.finditer(text_to_match[0:text_to_match.index(b" ")], original_text, re.U)]
+                         re.finditer(re.escape(text_to_match[0:text_to_match.index(b" ")]), original_text, re.U)]
+    if len(potential_matches) == 0:
+        potential_matches = [original_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
+                             re.finditer(re.escape(text_to_match[0]), original_text, re.U)]
+
     potential_matches = [(p[0:p.rindex(text_to_match[-1])+1] 
                           if text_to_match[-1] in p and len(p) > len(text_to_match)
                           else p)
@@ -206,7 +214,7 @@ def _match_by_edit_distance(original_text, text_to_match):
     if text_to_match[-1] in result:
         while result[-1] != text_to_match[-1]:
             result = result[0:-1]
-    elif text_to_match[-1] not in [']', '}'] and text_to_match[-2:] != "..":
+    elif text_to_match[-1] not in [']', '}', ')'] and text_to_match[-2:] != "..":
         while result[-1] != text_to_match[-1]:
             result += original_text[original_text.index(result) + len(result)][-1]
 
