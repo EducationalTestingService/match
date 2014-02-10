@@ -192,6 +192,10 @@ def _match_by_edit_distance(original_text, text_to_match):
     if len(potential_matches) == 0:
         potential_matches = [original_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
                              re.finditer(re.escape(text_to_match[0]), original_text, re.U)]
+    if len(potential_matches) == 0:
+        text_to_match = text_to_match.replace("(", "[")
+        potential_matches = [original_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
+                             re.finditer(re.escape(text_to_match[0]), original_text, re.U)]
 
     potential_matches = [(p[0:p.rindex(text_to_match[-1])+1] 
                           if text_to_match[-1] in p and len(p) > len(text_to_match)
