@@ -82,20 +82,16 @@ simply call <tt class="docutils literal"><span class="pre">regex.finditer(r'dog
 we&#8217;re interested in a sentence or phrase like &#8220;Dogs make great pets.&#8221;, things are not so 
 straightforward.</p>
 <p>In this case, it is useful to perform some cleanup of <tt class="docutils literal"><span class="pre">original_text</span></tt>, as described above.  This is very
-helpful because tokenization normalizes any non-ASCII characters to ASCII equivalents.  We do the same here,
+helpful because typical tokenization normalizes any non-ASCII characters to ASCII equivalents.  We do the same here,
 being careful not to expand any single character into multiple ones; that will throw off the offsets, since
 we are not interested in the offsets from <tt class="docutils literal"><span class="pre">clean_text</span></tt>, which the user will never see, but in <tt class="docutils literal"><span class="pre">original_text</span></tt>,
 which the user submitted.</p>
-<p>This sentence/phrase matching was tested on a set of 200 randomly-selected essays from GRE and TOEFL (200
-each) from 2011-2012 with complete disregard to score.  Each essay was sentence- and word-tokenized, and
-each word-tokenized sentence was passed to this function along with its essay.  From this, I determined
-that the following two strategies are necessary in order to get the offsets for any tokenized string.</p>
+<p>Through thorough testing, I determined that the following two strategies are necessary in order to get
+the offsets for any tokenized string.</p>
 <p><strong>First</strong>, we simply reverse tokenization on the string <tt class="docutils literal"><span class="pre">&quot;</span> <span class="pre">&quot;.join([&quot;Dogs&quot;,</span> <span class="pre">&quot;make&quot;,</span> <span class="pre">&quot;great&quot;,</span> <span class="pre">&quot;pets&quot;,</span> <span class="pre">&quot;.&quot;])</span></tt>
-and try to find it directly in <tt class="docutils literal"><span class="pre">original_text</span></tt> using <tt class="docutils literal"><span class="pre">finditer()</span></tt>.  For the test set described
-above, 94.3% of the sentences from the GRE essays and 91.9% of the sentences from the TOEFL essays
-returned the correct match and offsets within the original essay using just this strategy alone.</p>
-<p>For the remaining 6.7% and 9.1% of sentences, respectively, a <strong>second</strong> and more time-consuming
-method is necessary.</p>
+and try to find it directly in <tt class="docutils literal"><span class="pre">original_text</span></tt> using <tt class="docutils literal"><span class="pre">finditer()</span></tt>.  For my test set, this returned
+the correct match for over 91% of the cases.</p>
+<p>For the remaining test cases, a <strong>second</strong> and slightly more time-consuming method is necessary.</p>
 <ol class="arabic simple">
 <li>Use <tt class="docutils literal"><span class="pre">finditer()</span></tt> on <tt class="docutils literal"><span class="pre">&quot;\s*&quot;.join([&quot;Dogs&quot;,</span> <span class="pre">&quot;make&quot;,</span> <span class="pre">&quot;great&quot;,</span> <span class="pre">&quot;pets&quot;,</span> <span class="pre">&quot;.&quot;])</span></tt>.  This works particularly well for essays because many candidates accidentally insert more whitespace characters than necessary, and toksent and expunct do an excellent job of removing the excess spaces.  However, our offsets need to include those spaces.  Should this fail:</li>
 <li>Use Levenshtein edit distance, as implemented in <tt class="docutils literal"><span class="pre">nltk.metrics.distance.edit_distance()</span></tt>.  For each attempt with edit distance, we extract all strings that start with the same token as the one we&#8217;re looking for (&#8220;Dogs&#8221; in this example) that have the same number of characters (as &#8220;Dogs make great pets.&#8221;), and return the one with the lowest edit distance to the search string.</li>

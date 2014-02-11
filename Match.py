@@ -34,11 +34,6 @@ def match_lines(original_text, things_to_match):
         if len(thing) == 0:
             continue
         matches = match(original_text, thing, clean_text=without_smart_quotes)
-        #if type(matches) is not list:
-        #    print(matches)
-        #elif len(matches) == 0:
-        #    print(thing)
-        #else:
         matched_lines += matches
 
     return sorted(set(matched_lines))
@@ -64,27 +59,22 @@ def match(original_text, word_or_token_list_to_match, clean_text=None):
     straightforward.
 
     In this case, it is useful to perform some cleanup of ``original_text``, as described above.  This is very
-    helpful because tokenization normalizes any non-ASCII characters to ASCII equivalents.  We do the same here,
+    helpful because typical tokenization normalizes any non-ASCII characters to ASCII equivalents.  We do the same here,
     being careful not to expand any single character into multiple ones; that will throw off the offsets, since
     we are not interested in the offsets from ``clean_text``, which the user will never see, but in ``original_text``,
     which the user submitted.
 
-    This sentence/phrase matching was tested on a set of 200 randomly-selected essays from GRE and TOEFL (200
-    each) from 2011-2012 with complete disregard to score.  Each essay was sentence- and word-tokenized, and
-    each word-tokenized sentence was passed to this function along with its essay.  From this, I determined
-    that the following two strategies are necessary in order to get the offsets for any tokenized string.
+    Through thorough testing, I determined that the following two strategies are necessary in order to get
+    the offsets for any tokenized string.
 
     **First**, we simply reverse tokenization on the string ``" ".join(["Dogs", "make", "great", "pets", "."])``
-    and try to find it directly in ``original_text`` using ``finditer()``.  For the test set described
-    above, 94.3% of the sentences from the GRE essays and 91.9% of the sentences from the TOEFL essays
-    returned the correct match and offsets within the original essay using just this strategy alone.
+    and try to find it directly in ``original_text`` using ``finditer()``.  For my test set, this returned
+    the correct match for over 91% of the cases.
 
-    For the remaining 6.7% and 9.1% of sentences, respectively, a **second** and more time-consuming
-    method is necessary.
+    For the remaining test cases, a **second** and slightly more time-consuming method is necessary.
 
     1. Use ``finditer()`` on ``"\s*".join(["Dogs", "make", "great", "pets", "."])``.  This works particularly well for essays because many candidates accidentally insert more whitespace characters than necessary, and toksent and expunct do an excellent job of removing the excess spaces.  However, our offsets need to include those spaces.  Should this fail:
     2. Use Levenshtein edit distance, as implemented in ``nltk.metrics.distance.edit_distance()``.  For each attempt with edit distance, we extract all strings that start with the same token as the one we're looking for ("Dogs" in this example) that have the same number of characters (as "Dogs make great pets."), and return the one with the lowest edit distance to the search string.
-
 
     We'll try (2) against the original text and our untokenized version from before, and if that fails, 
     we try edit distance again against the original text and ``" ".join(["Dogs", "make", "great", "pets", "."])``.
