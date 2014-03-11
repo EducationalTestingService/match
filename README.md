@@ -37,6 +37,15 @@ In [25]: Match.match(original_text, "I")
 Out[25]: [(0, 1, u'I'), (37, 38, u'I')]
 ```
 
+When passing in a single `string`, `match()` is expecting that `string` to be a single word or token.  Thus, the following does not work as one would expect:
+
+```python
+In [5]: Match.match("****because,the****", "because , the")
+Out[5]: []
+```
+
+Try `"because , the".split(" ")` instead.
+
 For convenience, a function called `match_lines()` is provided:
 ```python
 In [26]: Match.match_lines(original_text, [[u'-LRB-', u'and', u'do', u'weird', u'stuff', u'with', u'punctuation', u'-RRB-'], [u'I', u'am', u'writing', u'a', u'letter', u'!'], "I"])
