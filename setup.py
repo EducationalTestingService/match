@@ -4,7 +4,7 @@ from setuptools import setup
 
 def readme():
     with open('README.md') as f:
-        return f.read()
+        return f.read().decode("utf8")
 
 setup(name='match',
       version='0.1',
