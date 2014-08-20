@@ -58,6 +58,14 @@ Out[26]:
 
 The values returned will always be sorted by their offsets.
 
+## Installation
+
+For Mac OS X and 64-bit Linux:
+
+```
+$ conda install -c https://conda.binstar.org/dmnapolitano match
+```
+
 ## Requirements
 
 * Python >= 2.7 (works with both 2.7 and 3.3!)
