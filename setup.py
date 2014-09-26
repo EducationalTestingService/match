@@ -18,5 +18,8 @@ setup(name='match',
       url='https://github.com/EducationalTestingService/match',
       author='Diane Napolitano',
       author_email='dnapolitano@ets.org',
-      license='GPLv2',
+      classifiers=[
+          "License :: OSI Approved :: Apache Software License",
+          "Topic :: Text Processing",
+      ],
       packages=['match'])
