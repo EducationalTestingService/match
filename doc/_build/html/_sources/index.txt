@@ -9,7 +9,7 @@ Welcome to match's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 5
    
    match
 

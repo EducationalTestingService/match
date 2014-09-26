@@ -3,8 +3,12 @@
 from setuptools import setup
 
 def readme():
-    with open('README.md', 'r', encoding="utf8") as f:
-        return f.read()
+    try: # 3.x
+        with open('README.md', 'r', encoding="utf8") as f:
+            return f.read()
+    except:
+        with open('README.md', 'r') as f:
+            return f.read()
 
 setup(name='match',
       version='0.1',

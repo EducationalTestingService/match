@@ -4,7 +4,7 @@ match Package
 :mod:`Match` Module
 -----------------------
 
-.. automodule:: Match
+.. automodule:: match.Match
     :members:
     :undoc-members:
     :show-inheritance:
