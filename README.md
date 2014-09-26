@@ -1,6 +1,8 @@
 match
 =====
 
+[![Binstar Badge](https://binstar.org/dmnapolitano/match/badges/downloads.svg)](https://binstar.org/dmnapolitano/match)
+
 The purpose of the module `Match` is to get the offsets (as well as the string between those offsets, for debugging) of a cleaned-up, tokenized string from its original, untokenized source.  "Big deal," you might say, but this is actually a pretty difficult task if the original text is sufficiently messy, not to mention rife with Unicode characters.
 
 Consider some text, stored in a variable `original_text`, like:
