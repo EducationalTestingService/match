@@ -22,12 +22,6 @@ import regex as re
 from nltk.metrics.distance import edit_distance
 
 
-'''
-:author: Diane M. Napolitano (dnapolitano@ets.org)
-:organization: ETS
-'''
-
-
 def match_lines(original_text, things_to_match):
     '''
     :param original_text: ``str``/``Unicode`` containing the original text to get offsets within
