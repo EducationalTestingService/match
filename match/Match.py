@@ -140,8 +140,10 @@ def untokenize(text):
 
     step1 = re.sub(r'([\*\?])', r'\\\\\1', text.decode("utf8"), re.U)
  
-    step2 = step1.replace(b"`` ", b'"\s*').replace(b" ''", b'"\s*')
-    step2 = step2.replace(b" -LRB- ", b" [\[\(]")
+#    step2 = step1.replace(b"`` ", b'"\s*').replace(b" ''", b'"\s*')
+    step2 = step1.replace("`` ", '"\s*').replace(" ''", '"\s*')
+#    step2 = step2.replace(b" -LRB- ", b" [\[\(]")
+    step2 = step2.replace(" -LRB- ", " [\[\(]")
     step2 = re.sub(r' -RRB- ?', r"[\]\)] ", step2)
 
     step2a = re.sub(r'\.\.\. *', r'[\.…]{1,3}', step2, re.U)
@@ -151,7 +153,8 @@ def untokenize(text):
 
     step5 = re.sub(r" '", r"'", step4)
     step5 = re.sub(r" n't", r"n't", step5)
-    step5 = step5.replace(b"can not", b"cannot")
+#    step5 = step5.replace(b"can not", b"cannot")
+    step5 = step5.replace("can not", "cannot")
 
     step6 = re.sub(r'( *)` ', r"\1'", step5)
 
@@ -170,19 +173,22 @@ def _cleanup_text(original_text):
     # Borrowed from code by Dan Blanchard; 
     # added more weird quotation marks because they weren't matching w/ the Unicode codes
     non_ascii = [
-        (b'’', b"'"), # ?
-        (b'“', b'"'), # ?
-        (b'”', b'"'), # ?
-        (b' ', b' '), # mystery space
-        (b"\n", b' '), # newlines
-        (b"\u2018", b"'"), # left single quotation mark
-        (b"\u2019", b"'"), # right single quotation mark
-        (b"\u201c", b'"'), # left double quotation mark
-        (b"\u201d", b'"'), # right double quotation mark
-        (b"\u2013", b"-"), # en dash
-        (b"\u00a0", b" ")] # no-break space
+        ('’', "'"), # ?
+        ('“', '"'), # ?
+        ('”', '"'), # ?
+        (' ', ' '), # mystery space
+        ("\n", ' '), # newlines
+        ("\u2018", "'"), # left single quotation mark
+        ("\u2019", "'"), # right single quotation mark
+        ("\u201c", '"'), # left double quotation mark
+        ("\u201d", '"'), # right double quotation mark
+        ("\u2013", "-"), # en dash
+        ("\u00a0", " ")] # no-break space
     for (unicode_char, ascii_char) in non_ascii:
-        cleaned = cleaned.replace(unicode_char, ascii_char)
+        try:
+            cleaned = cleaned.replace(bytes(unicode_char, "utf-8"), bytes(ascii_char, "utf-8"))
+        except:
+            cleaned = cleaned.replace(unicode_char.encode("utf-8"), ascii_char.encode("utf-8"))
     cleaned = cleaned.decode("utf8")
     return cleaned
 
@@ -193,7 +199,8 @@ def _match_by_edit_distance(original_text, text_to_match):
     text_to_match = re.sub(r'\[\\\]\\\)\]$', ')', text_to_match)
 
     try:
-        end_point = (text_to_match.index(b" ") if " " in text_to_match else len(text_to_match))
+#        end_point = (text_to_match.index(b" ") if " " in text_to_match else len(text_to_match))
+        end_point = (text_to_match.index(" ") if " " in text_to_match else len(text_to_match))
         potential_matches = [original_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
                              re.finditer(re.escape(text_to_match[0:end_point]), original_text, re.U)]
     except:

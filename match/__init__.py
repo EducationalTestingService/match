@@ -1,1 +1,4 @@
-import Match
+try:
+    import Match
+except:
+    pass
