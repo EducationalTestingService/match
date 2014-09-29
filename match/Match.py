@@ -107,7 +107,7 @@ def match(original_text, word_or_token_list_to_match, clean_text=None):
 
     if type(word_or_token_list_to_match) is list:
         to_match = untokenize(" ".join(word_or_token_list_to_match).strip())
-        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(to_match, clean_text, regex_flags)]
+        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(re.escape(to_match), clean_text, regex_flags)]
         if len(matches) == 0:
             matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
                        for m in re.finditer("\s*".join(re.escape(w) for w in word_or_token_list_to_match), original_text, regex_flags)]
@@ -122,7 +122,7 @@ def match(original_text, word_or_token_list_to_match, clean_text=None):
                     if len(matches) == 0:
                         return []
     else:
-        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(r'\b' + word_or_token_list_to_match + r'\b', clean_text, regex_flags)]
+        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(r'\b' + re.escape(word_or_token_list_to_match) + r'\b', clean_text, regex_flags)]
 
     return sorted(matches)
 
