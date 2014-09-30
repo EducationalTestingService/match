@@ -1,6 +1,6 @@
 package:
   name: match
-  version: "0.1"
+  version: "0.2"
 
 source:
   git_url: https://github.com/EducationalTestingService/match.git
@@ -20,5 +20,5 @@ requirements:
 
 about:
   home: https://github.com/EducationalTestingService/match
-  license: GPLv2
+  license: Apache 2.0
   summary: Obtain offsets of clean strings within messy text.
