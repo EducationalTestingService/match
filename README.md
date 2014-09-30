@@ -3,6 +3,9 @@ match
 
 [![Binstar Badge](https://binstar.org/dmnapolitano/match/badges/downloads.svg)](https://binstar.org/dmnapolitano/match) [![Build Status](https://travis-ci.org/EducationalTestingService/match.svg?branch=master)](https://travis-ci.org/EducationalTestingService/match)
 
+[![PyPi version](https://pypip.in/v/match/badge.png)](https://crate.io/packages/match/)
+[![PyPi downloads](https://pypip.in/d/match/badge.png)](https://crate.io/packages/match/)
+
 The purpose of the module `Match` is to get the offsets (as well as the string between those offsets, for debugging) of a cleaned-up, tokenized string from its original, untokenized source.  "Big deal," you might say, but this is actually a pretty difficult task if the original text is sufficiently messy, not to mention rife with Unicode characters.
 
 Consider some text, stored in a variable `original_text`, like:
@@ -62,7 +65,7 @@ The values returned will always be sorted by their offsets.
 
 ## Installation
 
-For Mac OS X and 64-bit Linux:
+`pip install match`, or for Mac OS X and 64-bit Linux:
 
 ```
 $ conda install -c https://conda.binstar.org/dmnapolitano match
