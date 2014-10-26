@@ -19,4 +19,8 @@ setup(name='match',
           "License :: OSI Approved :: Apache Software License",
           "Topic :: Text Processing",
       ],
-      packages=['match'])
+      packages=['match'],
+      install_requires=[
+        "python>=2.7",
+        "nltk",
+        "regex"])
