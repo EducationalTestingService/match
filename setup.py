@@ -4,7 +4,7 @@ import io
 from setuptools import setup
 
 def readme():
-    with io.open('README.pypi', 'r', encoding="utf8") as f:
+    with io.open('README.txt', 'r', encoding="utf8") as f:
         return f.read()
 
 setup(name='match',
