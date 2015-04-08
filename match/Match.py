@@ -140,9 +140,7 @@ def untokenize(text):
 
     step1 = re.sub(r'([\*\?])', r'\\\\\1', text.decode("utf8"), re.U)
  
-#    step2 = step1.replace(b"`` ", b'"\s*').replace(b" ''", b'"\s*')
     step2 = step1.replace("`` ", '"\s*').replace(" ''", '"\s*')
-#    step2 = step2.replace(b" -LRB- ", b" [\[\(]")
     step2 = step2.replace(" -LRB- ", " [\[\(]")
     step2 = re.sub(r' -RRB- ?', r"[\]\)] ", step2)
 
@@ -153,7 +151,6 @@ def untokenize(text):
 
     step5 = re.sub(r" '", r"'", step4)
     step5 = re.sub(r" n't", r"n't", step5)
-#    step5 = step5.replace(b"can not", b"cannot")
     step5 = step5.replace("can not", "cannot")
 
     step6 = re.sub(r'( *)` ', r"\1'", step5)
@@ -199,7 +196,6 @@ def _match_by_edit_distance(original_text, text_to_match):
     text_to_match = re.sub(r'\[\\\]\\\)\]$', ')', text_to_match)
 
     try:
-#        end_point = (text_to_match.index(b" ") if " " in text_to_match else len(text_to_match))
         end_point = (text_to_match.index(" ") if " " in text_to_match else len(text_to_match))
         potential_matches = [original_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
                              re.finditer(re.escape(text_to_match[0:end_point]), original_text, re.U)]
@@ -238,6 +234,9 @@ def _match_by_edit_distance(original_text, text_to_match):
     result = match_with_lowest_edit_distance.strip()
     if text_to_match[-1] in result:
         while result[-1] != text_to_match[-1]:
+            result = result[0:-1]
+    elif text_to_match[-1] == '"' and re.search(r'["”\u201d]', result):
+        while result[-1] not in ['"', '”', "\u201d"]:
             result = result[0:-1]
     elif text_to_match[-1] not in [']', '}', ')'] and text_to_match[-2:] != "..":
         while result[-1] != text_to_match[-1]:
