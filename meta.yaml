@@ -12,6 +12,8 @@ build:
 requirements:
   build:
     - python
+    - nltk
+    - regex
   run:
     - python
     - nltk
