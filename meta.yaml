@@ -12,10 +12,8 @@ build:
 requirements:
   build:
     - python
-    - setuptools
   run:
     - python
-    - setuptools
     - nltk
     - regex
 
