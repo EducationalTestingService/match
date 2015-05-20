@@ -23,5 +23,4 @@ setup(name='match',
       install_requires=[
         "python>=2.7",
         "nltk",
-        "regex",
-        "setuptools"])
+        "regex"])
