@@ -8,7 +8,7 @@ def readme():
         return f.read()
 
 setup(name='match',
-      version='0.2',
+      version='0.2.1',
       description=(''),
       long_description=readme(),
       keywords='tokenization',
