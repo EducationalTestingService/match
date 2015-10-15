@@ -112,15 +112,19 @@ def match(original_text, word_or_token_list_to_match, clean_text=None):
             matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
                        for m in re.finditer("\s*".join(re.escape(w) for w in word_or_token_list_to_match), original_text, regex_flags)]
             if len(matches) == 0:
-                edit_distance_match = _match_by_edit_distance(original_text, re.sub(r'\\s[\*\+]', r' ', to_match))
+                edit_distance_match = _match_by_edit_distance(clean_text, re.sub(r'\\s[\*\+]', r' ', to_match))
                 matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
-                           for m in re.finditer(re.escape(edit_distance_match), original_text, regex_flags)]
+                           for m in re.finditer(re.escape(edit_distance_match), clean_text, regex_flags)]
                 if len(matches) == 0:
-                    edit_distance_match = _match_by_edit_distance(original_text, " ".join(word_or_token_list_to_match))
+                    edit_distance_match = _match_by_edit_distance(original_text, re.sub(r'\\s[\*\+]', r' ', to_match))
                     matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
                                for m in re.finditer(re.escape(edit_distance_match), original_text, regex_flags)]
                     if len(matches) == 0:
-                        return []
+                        edit_distance_match = _match_by_edit_distance(original_text, " ".join(word_or_token_list_to_match))
+                        matches = [(m.start(), m.end(), original_text[m.start():m.end()]) 
+                                   for m in re.finditer(re.escape(edit_distance_match), original_text, regex_flags)]
+                        if len(matches) == 0:
+                            return []
     else:
         matches = [(m.start(), m.end(), original_text[m.start():m.end()]) for m in re.finditer(r'\b' + re.escape(word_or_token_list_to_match) + r'\b', clean_text, regex_flags)]
 
@@ -190,29 +194,30 @@ def _cleanup_text(original_text):
     return cleaned
 
 
-def _match_by_edit_distance(original_text, text_to_match):
+def _match_by_edit_distance(full_text, text_to_match):
     text_to_match = text_to_match.replace("-LRB-", "(").replace("-RRB-", ")")
     text_to_match = text_to_match.replace("-LCB-", "{").replace("-RCB-", "}")
     text_to_match = re.sub(r'\[\\\]\\\)\]$', ')', text_to_match)
 
     try:
         end_point = (text_to_match.index(" ") if " " in text_to_match else len(text_to_match))
-        potential_matches = [original_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
-                             re.finditer(re.escape(text_to_match[0:end_point]), original_text, re.U)]
+        potential_matches = [full_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
+                             re.finditer(re.escape(text_to_match[0:end_point]), full_text, re.U | re.I)]
     except:
         import sys
 
-        print(original_text)
+        print(full_text)
         print()
         print(text_to_match)
         sys.exit(1)
+        
     if len(potential_matches) == 0:
-        potential_matches = [original_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
-                             re.finditer(re.escape(text_to_match[0]), original_text, re.U)]
+        potential_matches = [full_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
+                             re.finditer(re.escape(text_to_match[0]), full_text, re.U)]
     if len(potential_matches) == 0:
         text_to_match = text_to_match.replace("(", "[")
-        potential_matches = [original_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
-                             re.finditer(re.escape(text_to_match[0]), original_text, re.U)]
+        potential_matches = [full_text[m.start():(m.start() + len(text_to_match) + 1)] for m in 
+                             re.finditer(re.escape(text_to_match[0]), full_text, re.U)]
 
     potential_matches = [(p[0:p.rindex(text_to_match[-1])+1] 
                           if text_to_match[-1] in p and len(p) > len(text_to_match)
@@ -227,7 +232,7 @@ def _match_by_edit_distance(original_text, text_to_match):
     lowest_edit_distance = -1
     for match in potential_matches:
         e_d = edit_distance(match, text_to_match)
-        if lowest_edit_distance == -1 or e_d < lowest_edit_distance:
+        if lowest_edit_distance == -1 or e_d <= lowest_edit_distance:
             lowest_edit_distance = e_d
             match_with_lowest_edit_distance = match
 
@@ -240,6 +245,6 @@ def _match_by_edit_distance(original_text, text_to_match):
             result = result[0:-1]
     elif text_to_match[-1] not in [']', '}', ')'] and text_to_match[-2:] != "..":
         while result[-1] != text_to_match[-1]:
-            result += original_text[original_text.index(result) + len(result)][-1]
+            result += full_text[full_text.index(result) + len(result)][-1]
 
     return result
