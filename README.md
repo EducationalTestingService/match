@@ -74,7 +74,7 @@ $ conda install -c https://conda.binstar.org/dmnapolitano match
 
 ## Requirements
 
-* Python >= 2.7 (works with both 2.7 and 3.3!)
+* Python >= 2.7 (works with both 2.7 and 3.4!)
 * [nltk](http://www.nltk.org)
 * [regex](https://pypi.python.org/pypi/regex)
 
