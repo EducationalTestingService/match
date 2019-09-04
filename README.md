@@ -3,8 +3,6 @@ match
 
 [![Build Status](https://travis-ci.org/EducationalTestingService/match.svg?branch=master)](https://travis-ci.org/EducationalTestingService/match)
 
-[![Binstar Badge](https://binstar.org/dmnapolitano/match/badges/version.svg)](https://binstar.org/dmnapolitano/match)[![Binstar Badge](https://binstar.org/dmnapolitano/match/badges/downloads.svg)](https://binstar.org/dmnapolitano/match)
-
 [![Latest Version](https://img.shields.io/pypi/v/match.svg)](https://pypi.python.org/pypi/match/)[![Downloads](https://img.shields.io/pypi/dm/match.svg)](https://pypi.python.org/pypi/match/)
 
 The purpose of the module `Match` is to get the offsets (as well as the string between those offsets, for debugging) of a cleaned-up, tokenized string from its original, untokenized source.  "Big deal," you might say, but this is actually a pretty difficult task if the original text is sufficiently messy, not to mention rife with Unicode characters.
