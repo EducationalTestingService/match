@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-try:
-    from itertools import izip as zip
-except:
-    pass
-
 import sys
 
 from nose.tools import eq_

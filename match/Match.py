@@ -14,9 +14,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-
-from __future__ import print_function, unicode_literals
-
 import regex as re
 
 from nltk.metrics.distance import edit_distance
@@ -145,9 +142,9 @@ def _match_by_edit_distance(full_text, text_to_match):
     except:
         import sys
 
-        print(full_text)
-        print()
-        print(text_to_match)
+        print(full_text, file=sys.stderr)
+        print(file=sys.stderr)
+        print(text_to_match, file=sys.stderr)
         sys.exit(1)
         
     if len(potential_matches) == 0:

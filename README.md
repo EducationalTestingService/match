@@ -67,15 +67,15 @@ The values returned will always be sorted by their offsets.
 `pip install match`, or for Mac OS X and 64-bit Linux:
 
 ```
-$ conda install -c https://conda.binstar.org/dmnapolitano match
+$ conda install -c dmnapolitano match
 ```
 
 ## Requirements
 
-* Python >= 2.7 (works with both 2.7 and 3.4!)
+* Python >= 3.4
 * [nltk](http://www.nltk.org)
 * [regex](https://pypi.python.org/pypi/regex)
 
 ## Documentation
 
-Viewable [here](match).
+[Here!](match).
