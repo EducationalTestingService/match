@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#   Copyright 2014, Educational Testing Service
+#   Copyright 2019, Educational Testing Service
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -23,23 +23,8 @@ from nltk.metrics.distance import edit_distance
 
 
 def match_lines(original_text, things_to_match):
-    '''
-    :param original_text: ``str``/``Unicode`` containing the original text to get offsets within
-    :param things_to_match: ``list(words/phrases)`` whose offsets we wish to find within ``original_text``.
+    '''See README.md for a description of how to use this function.'''
 
-    If ``things_to_match`` is a list of tokenized strings, each element of ``things_to_match`` is expected to be a ``list`` of tokens.
-    For example::
-
-        [["Hello", ",", "world", "!"], ["That", "was", "the", "first", "sentence", ";", "here", "is", "the", "second", "."]]
-
-    ``things_to_match`` could also be::
-
-        ["cat", "dog", "octopus"]
-
-    or even a mix of the two.  This function will call :mod:`sourcerater.util.Match.match()` on each element of ``things_to_match``.
-
-    :returns: ``sorted(set([(start, end, word/phrase) for word/phrase in things_to_match]))`` for ALL occurrences of each word/phrase in ``things_to_match``.
-    '''
     matched_lines = []
     unique_things_to_match = (set(things_to_match) if type(things_to_match[0]) is not list else things_to_match)
     
@@ -55,47 +40,7 @@ def match_lines(original_text, things_to_match):
 
 
 def match(original_text, word_or_token_list_to_match, clean_text=None):
-    '''
-    :param original_text: ``str``/``Unicode`` containing the original text to get offsets within
-    :param word_or_token_list_to_match: Either a single ``str``/``Unicode`` corresponding to a single token we want offsets for, or a ``list(str)`` corresponding to a phrase/sentence we want offsets for.
-    :param clean_text: If ``None``, this function will do some preliminary cleaning of ``original_text`` to better facilitate the matching process (replacing strange quotation marks with ASCII ones, etc.).  This is a one-to-one process; a single character simply becomes a different single character, so as to not throw off the offsets of ``word_or_token_list_to_match`` within ``original_text``.  It's just that ``word_or_token_to_match`` will probably not match against a text with non-ASCII characters in it, especially if those characters are Windows "smart" quotes.
-
-    :returns: ``sorted([(start, end, word/phrase)])`` where each ``tuple`` contains a unique occurrence of ``word_or_token_list_to_match`` in ``original_text``, and the word/phrase is what is contained within ``original_text`` at that ``start``/``end`` offset pair.
-
-    **How This Works**
-
-    Much of this hinges on the existance of ``finditer()`` in Python's ``regex`` module.  We use a list 
-    comprehension to generate a ``list`` of ``(m.start(), m.end(), original_text[m.start():m.end()])``
-    tuples for each match ``m`` returned by ``finditer()``.
-
-    When where we're interested in all occurrences of a single token, for example "dog", we
-    simply call ``regex.finditer(r'\bdog\b', original_text, regex.U | regex.I)``.  When where 
-    we're interested in a sentence or phrase like "Dogs make great pets.", things are not so 
-    straightforward.
-
-    In this case, it is useful to perform some cleanup of ``original_text``, as described above.  This is very
-    helpful because typical tokenization normalizes any non-ASCII characters to ASCII equivalents.  We do the same here,
-    being careful not to expand any single character into multiple ones; that will throw off the offsets, since
-    we are not interested in the offsets from ``clean_text``, which the user will never see, but in ``original_text``,
-    which the user submitted.
-
-    Through thorough testing, I determined that the following two strategies are necessary in order to get
-    the offsets for any tokenized string.
-
-    **First**, we simply reverse tokenization on the string ``" ".join(["Dogs", "make", "great", "pets", "."])``
-    and try to find it directly in ``original_text`` using ``finditer()``.  For my test set, this returned
-    the correct match for over 91% of the cases.
-
-    For the remaining test cases, a **second** and slightly more time-consuming method is necessary.
-
-    1. Use ``finditer()`` on ``"\s*".join(["Dogs", "make", "great", "pets", "."])``.  This works particularly well for essays because many candidates accidentally insert more whitespace characters than necessary, and toksent and expunct do an excellent job of removing the excess spaces.  However, our offsets need to include those spaces.  Should this fail:
-    2. Use Levenshtein edit distance, as implemented in ``nltk.metrics.distance.edit_distance()``.  For each attempt with edit distance, we extract all strings that start with the same token as the one we're looking for ("Dogs" in this example) that have the same number of characters (as "Dogs make great pets."), and return the one with the lowest edit distance to the search string.
-
-    We'll try (2) against the original text and our untokenized version from before, and if that fails, 
-    we try edit distance again against the original text and ``" ".join(["Dogs", "make", "great", "pets", "."])``.
-    Even if the search string is not in the original text, we'll return the offsets of the string
-    with the lowest edit distance within the original text.
-    '''
+    '''See README.md for a description of how to use this function.'''
 
     regex_flags = re.U | re.I
 
@@ -132,14 +77,8 @@ def match(original_text, word_or_token_list_to_match, clean_text=None):
 
 
 def untokenize(text):
-    '''
-    Based on https://github.com/commonsense/simplenlp/blob/master/simplenlp/euro.py#L132
-    
-    :param text: A single ``str``/``Unicode`` containing the sentence (well, might work on any arbitrary text) you'd like to untokenize.
-    :returns: A UTF8-encoded, regular expression-friendly, untokenized version of ``text``.
+    '''See README.md for a description of how to use this function.'''
 
-    .. seealso:: https://github.com/EducationalTestingService/stanford-thrift/blob/master/README_tokenizer.md which isn't actually used here (much slower than this approach)
-    '''
     text = text.encode('utf8')
 
     step1 = re.sub(r'([\*\?])', r'\\\\\1', text.decode("utf8"), re.U)

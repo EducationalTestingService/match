@@ -18,7 +18,7 @@ For example:
 [["Hello", ",", "world", "!"], ["That", "was", "the", "first", "sentence", ";", "here", "is", "the", "second", "."]]
 ```
 
-`things_to_match`` could also be:
+`things_to_match` could also be:
 
 ```python
 ["cat", "dog", "octopus"]

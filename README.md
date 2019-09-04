@@ -80,4 +80,4 @@ $ conda install -c https://conda.binstar.org/dmnapolitano match
 
 ## Documentation
 
-Viewable [here](https://rawgithub.com/dmnapolitano/match/master/doc/_build/html/index.html).
+Viewable [here](match).
