@@ -185,12 +185,17 @@ gold_results_all_sentences = [[(0, 64, u"It'? ?s hard to believe but Dreamforce 
                               [(5392, 5430, u'\xb7         Am\xe9lioration de la stabilit\xe9')],
                               [(5432, 5563, u'Les prochaines \xe9tapes visent un lancement mondial \xe0 San Diego lors du prochain Microsoft Management Summit (MMS), en mars prochain.')]]
 
+
+def check_match_full_sentence(test_sentence, gold_result):
+    sys.stderr.write("gold: " + str(gold_result) + "\n")
+    sys.stderr.write("test: " + str(test_sentence) + "\n")
+    if sys.version_info[0] >= 3:
+        eq_(gold_result, Match.match(test_text, test_sentence))
+    else:
+        eq_(gold_result, Match.match(test_text.decode("utf8"), test_sentence))
+    sys.stderr.write("\n")
+
+
 def test_match_full_sentences():
     for (test_sentence, gold_result) in zip(test_sentences, gold_results_all_sentences):
-        sys.stderr.write("gold: " + str(gold_result) + "\n")
-        sys.stderr.write("test: " + str(test_sentence) + "\n")
-        if sys.version_info[0] >= 3:
-            eq_(gold_result, Match.match(test_text, test_sentence))
-        else:
-            eq_(gold_result, Match.match(test_text.decode("utf8"), test_sentence))
-        sys.stderr.write("\n")
+        yield (check_match_full_sentence, test_sentence, gold_result)
