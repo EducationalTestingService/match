@@ -6,4 +6,4 @@ install:
   - pip install regex
   - pip install nltk
 # command to run tests, e.g. python setup.py test
-script:  nosetests
+script:  nosetests --with-coverage --cover-package=match
