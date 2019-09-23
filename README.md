@@ -18,42 +18,48 @@ This will/should/might be properly tokenized as:
 ```python
 [['I', 'am', 'writing', 'a', 'letter', '!'],
  ['Sometimes', ',', 'I', 'forget', 'to', 'put', 'spaces', '-LRB-', 'and', 'do', 'weird', 'stuff', 'with', 'punctuation', '-RRB-', '?'],
- ["J'aurai", 'une', 'pomme', ',', "s'il", 'vous', 'pl\xe2it', '!']]
+ ["J'aurai", 'une', 'pomme', ',', "s'il", 'vous', 'plâit', '!']]
 ```
 
 Now:
 
 ```python
-In [22]: match.match(original_text, ['-LRB-', 'and', 'do', 'weird', 'stuff', 'with', 'punctuation', '-RRB-'])
-Out[22]: [(60, 97, '(and do weird stuff with punctuation)')]
+In [2]: import match
 
-In [23]: Match.match(original_text, ['I', 'am', 'writing', 'a', 'letter', '!'])
-Out[23]: [(0, 25, 'I   am writing a letter !')]
+In [3]: match.match(original_text, ['-LRB-', 'and', 'do', 'weird', 'stuff', 'with', 'punctuation', '-RRB-'])
+Out[3]: [(60, 97, '(and do weird stuff with punctuation)')]
 
-In [24]: Match.match(original_text, [u"s'il", 'vous', 'pl\xe2it', '!'])
-Out[24]: [(121, 138, "s'il vous pl\xe2it !")]
+In [4]: match.match(original_text, ['I', 'am', 'writing', 'a', 'letter', '!'])
+Out[4]: [(0, 25, 'I   am writing a letter !')]
+
+In [5]: match.match(original_text, ["s'il", 'vous', 'plâit', '!'])
+Out[5]: [(121, 138, "s'il vous plâit !")]
 ```
 
 The return type from `match()` is a `list` because it will return *all* occurrences of the argument, be it a `list` of tokens or a single `string` (word):
 
 ```python
-In [25]: Match.match(original_text, "I")
-Out[25]: [(0, 1, 'I'), (37, 38, 'I')]
+In [6]: match.match(original_text, "I")
+Out[6]: [(0, 1, 'I'), (37, 38, 'I')]
 ```
 
-When passing in a single `string`, `match()` is expecting that `string` to be a single word or token.  Thus, the following does not work as one would expect:
+When passing in a single `string`, `match()` is expecting that `string` to be a single word or token.  Thus:
 
 ```python
-In [5]: Match.match("****because,the****", "because , the")
-Out[5]: []
+In [7]: match.match("****because,the****", "because , the")
+Out[7]: []
 ```
 
-Try `"because , the".split(" ")` instead.
+Try passing in `"because , the".split(' ')` instead.
 
 For convenience, a function called `match_lines()` is provided:
 ```python
-In [26]: Match.match_lines(original_text, [['-LRB-', 'and', 'do', 'weird', 'stuff', 'with', 'punctuation', '-RRB-'], ['I', 'am', 'writing', 'a', 'letter', '!'], "I"])
-Out[26]: 
+In [8]: match.match_lines(original_text, [ 
+   ...: ['-LRB-', 'and', 'do', 'weird', 'stuff', 'with', 'punctuation', '-RRB-'], 
+   ...: ['I', 'am', 'writing', 'a', 'letter', '!'], 
+   ...: "I" 
+   ...: ])
+Out[8]:
 [(0, 1, 'I'),
  (0, 25, 'I   am writing a letter !'),
  (37, 38, 'I'),

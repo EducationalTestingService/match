@@ -2,7 +2,7 @@
 
 from nose.tools import eq_
 
-from match import Match
+import match
 
 
 # Excepts from blog entries from the CBC/Corporati corpus: http://ynada.com/cbc-corporati/
@@ -186,7 +186,7 @@ gold_results_all_sentences = [[(0, 64, u"It'? ?s hard to believe but Dreamforce 
 
 def test_match_full_sentences():
     for (test_sentence, gold_result) in zip(test_sentences, gold_results_all_sentences):
-        current = Match.match(test_text, test_sentence)
+        current = match.match(test_text, test_sentence)
         message = "test: {}\ngold: {}\ncurrent: {}\n".format(
             str(test_sentence), str(gold_result), str(current))
         yield (eq_, current, gold_result, message)
