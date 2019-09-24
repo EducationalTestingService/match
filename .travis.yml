@@ -1,9 +1,8 @@
 language: python
 python:
   - "3.7"
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
-  - pip install -r requirements.txt --use-mirrors
+  - pip install -r requirements.txt
   - pip install coverage
 # command to run tests, e.g. python setup.py test
 script:  nosetests --with-coverage --cover-package=match
