@@ -248,3 +248,14 @@ Or maybe not. On Monday, researchers reported that cats are just as strongly bon
     gold = [(91, 95, 'cats'), (193, 197, 'cats'), (289, 293, 'cats'), (441, 445, 'cats')]
     current = match.match(original_text, "cats", clean_text=cleaned_text)
     eq_(current, gold)
+
+
+def test_match_without_supplying_cleaned_text_tokenized_phrase():
+    # https://www.poetryfoundation.org/poems/47247/in-just
+    original_text = """in Just-\nspring          when the world is mud-\nluscious the little\nlame balloonman\n\nwhistles          far          and wee\n\nand eddieandbill come\n
+running from marbles and\npiracies and it's\nspring\n\nwhen the world is puddle-wonderful\n\nthe queer\nold balloonman whistles\nfar          and             wee\nand bettyandisbel come dancing\n\nfrom hop-scotch and jump-rope and\n\nit's\nspring\nand\n\n         the\n\n                  goat-footed\n\nballoonMan          whistles\nfar\nand\nwee"""
+    # see issue #7
+    tokenized_phrase = ["marbles", "and", "piracies"]
+    gold = [(161, 181, 'marbles and\npiracies')]
+    current = match.match(original_text, tokenized_phrase)
+    eq_(current, gold)
