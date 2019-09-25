@@ -194,7 +194,7 @@ def test_match_full_sentences_regression():
 
 
 def test_match_lines_with_tokenized_sentences():
-    ''' Unit test for match.match_lines() '''
+    ''' Unit test for match.match_lines() where each thing to be matched is a tokenized sentence '''
     # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
     original_text = """Taking it easy now that my knees have liquid in them...hence the pain... Damn straight I'll be ready for my next sprint...this Sunday!  People are still talking about my @reply to @bradiewebb saying I hate him cause he didn't reply. It was a joke, douche bags.  RT@beeeebzy: RT @ayshneck: jimmy rollins did in fact figure out mo. he figured out that he can't hit him. NEW PREDICTION Phils in 08  @jayssaalexia RT pois eh;tem que juntar o povo do twitter,e quando tiver passando panico.Todo mundo perguntar se vo falar do #zina...  @cullenluv hey lady u still on? How's ur nite going so far?  @dhollings i want to be together. lets work it out ok. lets be a family again. it's okay. I promise.  @MsShortSale ....Open House in NMB 11-01-09, Quad-Condo Complex,$2,399,000.00 for all (4) or will sell individually.  Ã©â€¢Â·Ã£Ââ€žÃ©â€“â€œÃ¤ÂºÂºÃ£ÂÂ«Ã¤Â¼Å¡Ã£ÂÂ£Ã£ÂÂ¦Ã£Ââ€žÃ£ÂÂªÃ£Ââ€žÃ£Ââ€ºÃ£Ââ€žÃ£Ââ€¹Ã£â‚¬ÂÃ¤ÂºÂºÃ©â€“â€œÃ£â€šâ€™Ã§â€ºÂ´Ã¦Å½Â¥Ã¨Â¦â€¹Ã£â€šâ€¹Ã£ÂÂ®Ã£ÂÅ’Ã¥â€¡â€žÃ£ÂÂÃ¦â‚¬â€“Ã£ÂÂÃ¦â€žÅ¸Ã£ÂËœÃ£â€šâ€¹Ã£â‚¬â€š"""
     tokenized_sentences = [["Taking", "it", "easy", "now", "that", "my", "knees", "have", "liquid", "in", "them", "...", "hence", "the", "pain", "..."],
@@ -212,7 +212,13 @@ def test_match_lines_with_tokenized_sentences():
     eq_(current, gold)
 
 
-# def test_match_lines_with_single_words():
+def test_match_lines_with_single_words():
+    ''' Unit test for match.match_lines() where each thing to be matched is a single word '''
+    # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
+    original_text = """Global Voices Online Â» Alex Castro: A liberal, libertarian and libertine Brazilian blogger http://ff.im/-6izrC  Do the Conservatives Have a Death Wish? http://bit.ly/323Kq5  RT @Joshuabradenp: The Conservative stands on the shoulders of our Founders... While the Liberal stands on their throats! #p2 #ucot @JoeNBC  RE: @tvnewser Overall excellence? All this is about... is having Liberals handing out their awards to NBC, the biggest Lâ€¦ http://disq.us/px0  I thought conservatives we're champions of personal responsibility, the crux of this msg. Maybe they just hate the messenger? #hypocrisy"""
+    gold = [(39, 46, 'liberal'), (198, 210, 'Conservative'), (264, 271, 'Liberal')]
+    current = match.match_lines(original_text, ["liberal", "conservative"])
+    eq_(current, gold)
 
 
 def test_match_without_supplying_cleaned_text_single_word():
