@@ -222,10 +222,29 @@ def test_match_lines_with_single_words():
 
 
 def test_match_without_supplying_cleaned_text_single_word():
-    ''' Unit test for match.match() with user-supplied cleaned text '''
+    ''' Unit test for match.match() without user-supplied cleaned text, matching on a single word '''
     # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/ 
     original_text = """LIVING MY LIFE ONE STEP AT A TIME~NO NEED TO RUSH WHEN YOU HAVE PLENTY OF TIME~DON'T WORRY OVER THOSE WHO NEVER MADE IT TO YA FUTURE THE  @SpaceAstro the whole state of Arizona doesn't do Daylight Savings Time  #News #Environment #Nature Turmoil from climate change poses security risks http://economictimes.indiatimes.com/articleshow/5175652.cms  celebrates Halloween and time-travel with good friends, a scary movie, clingy cats, and hazelnut spice rum. Adieu, October; hello, November!  Working on my first video for the new #youtube channel. It's definitely going to be an acoustic cover of Times Like These - Foo Fighters #ff  of Beastly Behavior Sometimes the PEN is mightier than the sword or my tongue is sharper than my gun (but NOT always) When your ready to"""
     # see issue #6 for a discussion about how to handle matches on portions of hyphenated words
     gold = [(29, 33, 'TIME'), (74, 78, 'TIME'), (205, 209, 'Time'), (373, 377, 'time')]
     current = match.match(original_text, "time")
+    eq_(current, gold)
+
+
+def test_match_supplying_cleaned_text_single_word():
+    ''' Unit test for match.match() with user-supplied cleaned text, matching on a single word '''
+    # text from https://www.nytimes.com/2019/09/24/science/cats-humans-bonding.html
+    original_text = """Dogs are man’s best friend. They’re sociable, faithful and obedient. Our relationship with cats, on the other hand, is often described as more transactional. Aloof, mysterious and independent, cats are with us only because we feed them.
+
+Or maybe not. On Monday, researchers reported that cats are just as strongly bonded to us as dogs or infants, vindicating cat lovers across the land.
+
+“I get that a lot — ‘Well, I knew that, I know that cats like to interact with me,’” said Kristyn Vitale, an animal behavior scientist at Oregon State University and lead author of the new study, published in Current Biology. “But in science, you don’t know that until you test it.”"""
+    
+    cleaned_text = """Dogs are man's best friend. They're sociable, faithful and obedient. Our relationship with cats, on the other hand, is often described as more transactional. Aloof, mysterious and independent, cats are with us only because we feed them.
+
+Or maybe not. On Monday, researchers reported that cats are just as strongly bonded to us as dogs or infants, vindicating cat lovers across the land.
+
+\"I get that a lot - 'Well, I knew that, I know that cats like to interact with me,'\" said Kristyn Vitale, an animal behavior scientist at Oregon State University and lead author of the new study, published in Current Biology. "But in science, you don’t know that until you test it.\""""
+    gold = [(91, 95, 'cats'), (193, 197, 'cats'), (289, 293, 'cats'), (441, 445, 'cats')]
+    current = match.match(original_text, "cats", clean_text=cleaned_text)
     eq_(current, gold)
