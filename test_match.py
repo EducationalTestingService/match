@@ -184,9 +184,29 @@ gold_results_all_sentences = [[(0, 64, u"It'? ?s hard to believe but Dreamforce 
                               [(5432, 5563, u'Les prochaines \xe9tapes visent un lancement mondial \xe0 San Diego lors du prochain Microsoft Management Summit (MMS), en mars prochain.')]]
 
 
-def test_match_full_sentences():
+def test_match_full_sentences_regression():
+    ''' Regression tests for match.match() '''
     for (test_sentence, gold_result) in zip(test_sentences, gold_results_all_sentences):
         current = match.match(test_text, test_sentence)
         message = "test: {}\ngold: {}\ncurrent: {}\n".format(
             str(test_sentence), str(gold_result), str(current))
         yield (eq_, current, gold_result, message)
+
+
+def test_match_lines():
+    ''' Unit test for match.match_lines() '''
+    # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
+    original_text = """Taking it easy now that my knees have liquid in them...hence the pain... Damn straight I'll be ready for my next sprint...this Sunday!  People are still talking about my @reply to @bradiewebb saying I hate him cause he didn't reply. It was a joke, douche bags.  RT@beeeebzy: RT @ayshneck: jimmy rollins did in fact figure out mo. he figured out that he can't hit him. NEW PREDICTION Phils in 08  @jayssaalexia RT pois eh;tem que juntar o povo do twitter,e quando tiver passando panico.Todo mundo perguntar se vo falar do #zina...  @cullenluv hey lady u still on? How's ur nite going so far?  @dhollings i want to be together. lets work it out ok. lets be a family again. it's okay. I promise.  @MsShortSale ....Open House in NMB 11-01-09, Quad-Condo Complex,$2,399,000.00 for all (4) or will sell individually.  Ã©â€¢Â·Ã£Ââ€žÃ©â€“â€œÃ¤ÂºÂºÃ£ÂÂ«Ã¤Â¼Å¡Ã£ÂÂ£Ã£ÂÂ¦Ã£Ââ€žÃ£ÂÂªÃ£Ââ€žÃ£Ââ€ºÃ£Ââ€žÃ£Ââ€¹Ã£â‚¬ÂÃ¤ÂºÂºÃ©â€“â€œÃ£â€šâ€™Ã§â€ºÂ´Ã¦Å½Â¥Ã¨Â¦â€¹Ã£â€šâ€¹Ã£ÂÂ®Ã£ÂÅ’Ã¥â€¡â€žÃ£ÂÂÃ¦â‚¬â€“Ã£ÂÂÃ¦â€žÅ¸Ã£ÂËœÃ£â€šâ€¹Ã£â‚¬â€š"""
+    tokenized_sentences = [["Taking", "it", "easy", "now", "that", "my", "knees", "have", "liquid", "in", "them", "...", "hence", "the", "pain", "..."],
+                           ["Damn", "straight", "I", "'ll", "be", "ready", "for", "my", "next", "sprint", "...", "this", "Sunday", "!"],
+                           ["@", "jayssaalexia", "RT", "pois", "eh", ";", "tem", "que", "juntar", "o", "povo", "do", "twitter", ",", "e", "quando", "tiver", "passando", 
+                            "panico", ".", "Todo", "mundo", "perguntar", "se", "vo", "falar", "do", "#", "zina", "..."],
+                           ["Open", "House", "in", "NMB", "11-01-09", ",", "Quad-Condo", "Complex", ",", "$2,399,000.00", "for", "all", "-LRB-", "4", "-RRB-", "or", "will",
+                            "sell", "individually", "."]]
+    gold = [(0, 72, 'Taking it easy now that my knees have liquid in them...hence the pain...'),
+            (73, 134, "Damn straight I'll be ready for my next sprint...this Sunday!"),
+            (396, 529,
+             '@jayssaalexia RT pois eh;tem que juntar o povo do twitter,e quando tiver passando panico.Todo mundo perguntar se vo falar do #zina...'),
+            (711, 810, 'Open House in NMB 11-01-09, Quad-Condo Complex,$2,399,000.00 for all (4) or will sell individually.')]
+    current = match.match_lines(original_text, tokenized_sentences)
+    eq_(current, gold)
