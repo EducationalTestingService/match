@@ -259,3 +259,13 @@ running from marbles and\npiracies and it's\nspring\n\nwhen the world is puddle-
     gold = [(161, 181, 'marbles and\npiracies')]
     current = match.match(original_text, tokenized_phrase)
     eq_(current, gold)
+
+
+def test_match_supplying_cleaned_text_tokenized_phrase():
+    # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
+    original_text = """I refuse to be a Socialist!! I had fun last night thanks Court! ... http://lnk.ms/3DZ1C  Itâ€™s called â€œcommunism,â€ folks. http://bit.ly/RedFL"""
+    cleaned_text = """I refuse to be a Socialist!! I had fun last night thanks Court! ... http://lnk.ms/3DZ1C  It's called \"communism,\" folks. http://bit.ly/RedFL"""
+    tokenized_phrase = ["It", "'s", "called", '"', "communism", ",", '"']
+    gold = [(89, 113, 'Itâ€™s called â€œcommuni')]  # TODO: obviously not quite right...consider what can be done
+    current = match.match(original_text, tokenized_phrase, clean_text=cleaned_text)
+    eq_(current, gold)
