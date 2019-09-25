@@ -193,7 +193,7 @@ def test_match_full_sentences_regression():
         yield (eq_, current, gold_result, message)
 
 
-def test_match_lines():
+def test_match_lines_with_tokenized_sentences():
     ''' Unit test for match.match_lines() '''
     # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
     original_text = """Taking it easy now that my knees have liquid in them...hence the pain... Damn straight I'll be ready for my next sprint...this Sunday!  People are still talking about my @reply to @bradiewebb saying I hate him cause he didn't reply. It was a joke, douche bags.  RT@beeeebzy: RT @ayshneck: jimmy rollins did in fact figure out mo. he figured out that he can't hit him. NEW PREDICTION Phils in 08  @jayssaalexia RT pois eh;tem que juntar o povo do twitter,e quando tiver passando panico.Todo mundo perguntar se vo falar do #zina...  @cullenluv hey lady u still on? How's ur nite going so far?  @dhollings i want to be together. lets work it out ok. lets be a family again. it's okay. I promise.  @MsShortSale ....Open House in NMB 11-01-09, Quad-Condo Complex,$2,399,000.00 for all (4) or will sell individually.  Ã©â€¢Â·Ã£Ââ€žÃ©â€“â€œÃ¤ÂºÂºÃ£ÂÂ«Ã¤Â¼Å¡Ã£ÂÂ£Ã£ÂÂ¦Ã£Ââ€žÃ£ÂÂªÃ£Ââ€žÃ£Ââ€ºÃ£Ââ€žÃ£Ââ€¹Ã£â‚¬ÂÃ¤ÂºÂºÃ©â€“â€œÃ£â€šâ€™Ã§â€ºÂ´Ã¦Å½Â¥Ã¨Â¦â€¹Ã£â€šâ€¹Ã£ÂÂ®Ã£ÂÅ’Ã¥â€¡â€žÃ£ÂÂÃ¦â‚¬â€“Ã£ÂÂÃ¦â€žÅ¸Ã£ÂËœÃ£â€šâ€¹Ã£â‚¬â€š"""
@@ -209,4 +209,17 @@ def test_match_lines():
              '@jayssaalexia RT pois eh;tem que juntar o povo do twitter,e quando tiver passando panico.Todo mundo perguntar se vo falar do #zina...'),
             (711, 810, 'Open House in NMB 11-01-09, Quad-Condo Complex,$2,399,000.00 for all (4) or will sell individually.')]
     current = match.match_lines(original_text, tokenized_sentences)
+    eq_(current, gold)
+
+
+# def test_match_lines_with_single_words():
+
+
+def test_match_without_supplying_cleaned_text_single_word():
+    ''' Unit test for match.match() with user-supplied cleaned text '''
+    # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/ 
+    original_text = """LIVING MY LIFE ONE STEP AT A TIME~NO NEED TO RUSH WHEN YOU HAVE PLENTY OF TIME~DON'T WORRY OVER THOSE WHO NEVER MADE IT TO YA FUTURE THE  @SpaceAstro the whole state of Arizona doesn't do Daylight Savings Time  #News #Environment #Nature Turmoil from climate change poses security risks http://economictimes.indiatimes.com/articleshow/5175652.cms  celebrates Halloween and time-travel with good friends, a scary movie, clingy cats, and hazelnut spice rum. Adieu, October; hello, November!  Working on my first video for the new #youtube channel. It's definitely going to be an acoustic cover of Times Like These - Foo Fighters #ff  of Beastly Behavior Sometimes the PEN is mightier than the sword or my tongue is sharper than my gun (but NOT always) When your ready to"""
+    # see issue #6 for a discussion about how to handle matches on portions of hyphenated words
+    gold = [(29, 33, 'TIME'), (74, 78, 'TIME'), (205, 209, 'Time'), (373, 377, 'time')]
+    current = match.match(original_text, "time")
     eq_(current, gold)
