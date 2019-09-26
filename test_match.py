@@ -3,6 +3,7 @@
 from nose.tools import eq_
 
 import match
+from match.Match import _cleanup_text
 
 
 # Excepts from blog entries from the CBC/Corporati corpus: http://ynada.com/cbc-corporati/
@@ -279,4 +280,13 @@ def test_untokenize():
     original_text = "Chapter two: Enter the monkeyMosaic Monkey decided to take down all the demons in the jungle to become the King of the jungle. Kazaaaaa! !! (* inspired by Bruce lee: enter the dragon )************************************************************************************Recently, i came across a advertisement on a bus stop, it wrote this \\No one can survive on the diets of hope! \ So true. ... ..Who can? ?”"
     gold = 'Chapter\\s+two:\\s+Enter\\s+the\\s+monkeyMosaic\\s+Monkey\\s+decided\\s+to\\s+take\\s+down\\s+all\\s+the\\s+demons\\s+in\\s+the\\s+jungle\\s+to\\s+become\\s+the\\s+King\\s+of\\s+the\\s+jungle.\\s+Kazaaaaa!!!\\s+(\\\\*\\s+inspired\\s+by\\s+Bruce\\s+lee:\\s+enter\\s+the\\s+dragon\\s+)\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\******************************************************Recently,\\s+i\\s+came\\s+across\\s+a\\s+advertisement\\s+on\\s+a\\s+bus\\s+stop,\\s+it\\s+wrote\\s+this \\No\\s+one\\s+can\\s+survive\\s+on\\s+the\\s+diets\\s+of\\s+hope! \\\\s+So\\s+true.\\s+[\\.…]{1,3}..Who\\s+can?\\s+?”'
     current = match.untokenize(original_text)
+    eq_(current, gold)
+
+
+def test_cleanup_text():
+    ''' Unit test for _cleanup_text() '''
+    # symbols from the sidebar of https://en.wikipedia.org/wiki/Quotation_mark
+    original_text = "“ ”   \" \" ‘ ’   ' ' « » 「 」[ ]  ( )  { }  ⟨ ⟩ ,  ،  、‒  –  —  ― …  ...  . . .  ⋯  ᠁  ฯ ‹ ›  « » ‘ ’  “ ”  ' '  " " /  ⧸  ⁄ · ‱ • † ‡ ⹋  ° ” 〃¡ ¿ ※ × № ÷ º ª % ‰ ¶ ± ∓ ′  ″  ‴ § ‖  ¦ © ð ℗ ® ℠ ™ ¤ ؋ ​₳ ​ ฿ ​₿ ​ ₵ ​¢ ​₡ ​₢ ​ $ ​₫ ​₯ ​֏ ​ ₠ ​€ ​ ƒ ​₣ ​ ₲ ​ ₴ ​ ₭ ​ ₺ ​₾ ​ ₼ ​ℳ ​₥ ​ ₦ ​ ₧ ​₱ ​₰ ​£ ​ å å å ​﷼ ​៛ ​₽ ​₹ ₨ ​ ₪ ​ ৳ ​₸ ​₮ ​ ₩ ​ ¥ ​å ⁂ ❧ ☞ ‽ ⸮ ◊ ⁀"
+    gold = '"\u2009"   "\u2009" \'\u2009\'   \'\u2009\' « » 「 」[ ]  ( )  { }  ⟨ ⟩ ,  ،  、‒  -  —  ― …  ...  . . .  ⋯  ᠁  ฯ ‹ ›  « » \' \'  " "  \' \'   /  ⧸  ⁄ · ‱ • † ‡ ⹋  ° " 〃¡ ¿ ※ × № ÷ º ª % ‰ ¶ ± ∓ ′  ″  ‴ § ‖  ¦ © ð ℗ ® ℠ ™ ¤ ؋ \u200b₳ \u200b ฿ \u200b₿ \u200b ₵ \u200b¢ \u200b₡ \u200b₢ \u200b $ \u200b₫ \u200b₯ \u200b֏ \u200b ₠ \u200b€ \u200b ƒ \u200b₣ \u200b ₲ \u200b ₴ \u200b ₭ \u200b ₺ \u200b₾ \u200b ₼ \u200bℳ \u200b₥ \u200b ₦ \u200b ₧ \u200b₱ \u200b₰ \u200b£ \u200b å å å \u200b﷼ \u200b៛ \u200b₽ \u200b₹ ₨ \u200b ₪ \u200b ৳ \u200b₸ \u200b₮ \u200b ₩ \u200b ¥ \u200bå ⁂ ❧ ☞ ‽ ⸮ ◊ ⁀'
+    current = _cleanup_text(original_text)
     eq_(current, gold)
