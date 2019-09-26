@@ -251,6 +251,7 @@ Or maybe not. On Monday, researchers reported that cats are just as strongly bon
 
 
 def test_match_without_supplying_cleaned_text_tokenized_phrase():
+    ''' Unit test for match.match() with no user-supplied cleaned text, matching on a tokenized phrase '''
     # https://www.poetryfoundation.org/poems/47247/in-just
     original_text = """in Just-\nspring          when the world is mud-\nluscious the little\nlame balloonman\n\nwhistles          far          and wee\n\nand eddieandbill come\n
 running from marbles and\npiracies and it's\nspring\n\nwhen the world is puddle-wonderful\n\nthe queer\nold balloonman whistles\nfar          and             wee\nand bettyandisbel come dancing\n\nfrom hop-scotch and jump-rope and\n\nit's\nspring\nand\n\n         the\n\n                  goat-footed\n\nballoonMan          whistles\nfar\nand\nwee"""
@@ -262,10 +263,20 @@ running from marbles and\npiracies and it's\nspring\n\nwhen the world is puddle-
 
 
 def test_match_supplying_cleaned_text_tokenized_phrase():
+    ''' Unit test for match.match() with no supplied cleaned text, matching on a tokenized phrase '''
     # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
     original_text = """I refuse to be a Socialist!! I had fun last night thanks Court! ... http://lnk.ms/3DZ1C  Itâ€™s called â€œcommunism,â€ folks. http://bit.ly/RedFL"""
     cleaned_text = """I refuse to be a Socialist!! I had fun last night thanks Court! ... http://lnk.ms/3DZ1C  It's called \"communism,\" folks. http://bit.ly/RedFL"""
     tokenized_phrase = ["It", "'s", "called", '"', "communism", ",", '"']
     gold = [(89, 113, 'Itâ€™s called â€œcommuni')]  # TODO: obviously not quite right...consider what can be done
     current = match.match(original_text, tokenized_phrase, clean_text=cleaned_text)
+    eq_(current, gold)
+
+
+def test_untokenize():
+    ''' Unit test for untokenize() '''
+    # from the same corpus as the regression tests
+    original_text = "Chapter two: Enter the monkeyMosaic Monkey decided to take down all the demons in the jungle to become the King of the jungle. Kazaaaaa! !! (* inspired by Bruce lee: enter the dragon )************************************************************************************Recently, i came across a advertisement on a bus stop, it wrote this \\No one can survive on the diets of hope! \ So true. ... ..Who can? ?”"
+    gold = 'Chapter\\s+two:\\s+Enter\\s+the\\s+monkeyMosaic\\s+Monkey\\s+decided\\s+to\\s+take\\s+down\\s+all\\s+the\\s+demons\\s+in\\s+the\\s+jungle\\s+to\\s+become\\s+the\\s+King\\s+of\\s+the\\s+jungle.\\s+Kazaaaaa!!!\\s+(\\\\*\\s+inspired\\s+by\\s+Bruce\\s+lee:\\s+enter\\s+the\\s+dragon\\s+)\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\******************************************************Recently,\\s+i\\s+came\\s+across\\s+a\\s+advertisement\\s+on\\s+a\\s+bus\\s+stop,\\s+it\\s+wrote\\s+this \\No\\s+one\\s+can\\s+survive\\s+on\\s+the\\s+diets\\s+of\\s+hope! \\\\s+So\\s+true.\\s+[\\.…]{1,3}..Who\\s+can?\\s+?”'
+    current = match.untokenize(original_text)
     eq_(current, gold)
