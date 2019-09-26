@@ -3,7 +3,7 @@
 from nose.tools import eq_
 
 import match
-from match.Match import _cleanup_text
+from match.Match import _cleanup_text, _match_by_edit_distance
 
 
 # Excepts from blog entries from the CBC/Corporati corpus: http://ynada.com/cbc-corporati/
@@ -290,3 +290,12 @@ def test_cleanup_text():
     gold = '"\u2009"   "\u2009" \'\u2009\'   \'\u2009\' « » 「 」[ ]  ( )  { }  ⟨ ⟩ ,  ،  、‒  -  —  ― …  ...  . . .  ⋯  ᠁  ฯ ‹ ›  « » \' \'  " "  \' \'   /  ⧸  ⁄ · ‱ • † ‡ ⹋  ° " 〃¡ ¿ ※ × № ÷ º ª % ‰ ¶ ± ∓ ′  ″  ‴ § ‖  ¦ © ð ℗ ® ℠ ™ ¤ ؋ \u200b₳ \u200b ฿ \u200b₿ \u200b ₵ \u200b¢ \u200b₡ \u200b₢ \u200b $ \u200b₫ \u200b₯ \u200b֏ \u200b ₠ \u200b€ \u200b ƒ \u200b₣ \u200b ₲ \u200b ₴ \u200b ₭ \u200b ₺ \u200b₾ \u200b ₼ \u200bℳ \u200b₥ \u200b ₦ \u200b ₧ \u200b₱ \u200b₰ \u200b£ \u200b å å å \u200b﷼ \u200b៛ \u200b₽ \u200b₹ ₨ \u200b ₪ \u200b ৳ \u200b₸ \u200b₮ \u200b ₩ \u200b ¥ \u200bå ⁂ ❧ ☞ ‽ ⸮ ◊ ⁀'
     current = _cleanup_text(original_text)
     eq_(current, gold)
+
+
+def test_match_by_edit_distance():
+    ''' Unit test for _match_by_edit_distance() '''
+    # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
+    original_text = "Cant believe Barack Obama & his \"I dont want them to do a lot of talking. I dont mind cleanin up the mess\" WTF! F*#@ you Obama, shame on you"
+    current = _match_by_edit_distance(original_text, "Can't")
+    eq_(current, "Cant")
+    
