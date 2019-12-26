@@ -26,5 +26,5 @@ setup(name='match',
           "Topic :: Text Processing",
       ],
       packages=['match'],
-      install_requires=["python>=3.4"] + requirements()
+      install_requires=requirements()
       )
