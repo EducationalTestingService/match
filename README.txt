@@ -1,7 +1,4 @@
-
-
-MATCH
-
+match
 
 [Build Status]
 
@@ -36,7 +33,7 @@ Now:
     In [5]: match.match(original_text, ["s'il", 'vous', 'plâit', '!'])
     Out[5]: [(121, 138, "s'il vous plâit !")]
 
-The return type from match() is a list because it will return _all_
+The return type from match() is a list because it will return all
 occurrences of the argument, be it a list of tokens or a single string
 (word):
 
@@ -49,7 +46,8 @@ a single word or token. Thus:
     In [7]: match.match("****because,the****", "because , the")
     Out[7]: []
 
-Try passing in "because , the".split(' ') instead.
+Try passing in "because , the".split(' ') instead, or better yet, the
+output from a proper tokenizer.
 
 For convenience, a function called match_lines() is provided:
 
@@ -66,20 +64,17 @@ For convenience, a function called match_lines() is provided:
 
 The values returned will always be sorted by their offsets.
 
-
 Installation
 
 pip install match, or for Mac OS X and 64-bit Linux:
 
     $ conda install -c dmnapolitano match
 
-
 Requirements
 
 -   Python >= 3.4
 -   nltk
 -   regex
-
 
 Documentation
 

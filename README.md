@@ -50,7 +50,7 @@ In [7]: match.match("****because,the****", "because , the")
 Out[7]: []
 ```
 
-Try passing in `"because , the".split(' ')` instead.
+Try passing in `"because , the".split(' ')` instead, or better yet, the output from a proper tokenizer.
 
 For convenience, a function called `match_lines()` is provided:
 ```python
