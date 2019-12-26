@@ -1,0 +1,31 @@
+{% set data = load_setup_py_data(setup_file='../setup.py', from_recipe_dir=True) %}
+
+package:
+  name: {{ data.get('name') }}
+  version: {{ data.get('version') }}
+
+source:
+  git_url: {{ data.get('url') }}
+  path: ../match
+
+script:
+  - cd $SRC_DIR
+  - $PYTHON setup.py install
+
+{% block requirements -%}
+requirements:
+  build:
+    {% for req in data.get('install_requires', []) -%}
+    - {{(req.replace(">", " >") if ">" in req else req.replace("==", " "))}}
+    {% endfor %}
+  run:
+    - python
+    {% for package in resolved_packages('build') -%}
+    - {{ package }}
+    {% endfor %}
+{%- endblock %}
+
+about:
+  home: {{ data.get('url') }}
+  license: Apache 2.0
+  summary: Obtain offsets of tokenizer-standardized clean strings within messy text.

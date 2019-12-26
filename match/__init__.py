@@ -1,4 +1,2 @@
-try:
-    import Match
-except:
-    pass
+from match.Match import match, match_lines, untokenize
+

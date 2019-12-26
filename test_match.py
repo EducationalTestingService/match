@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
 
-try:
-    from itertools import izip as zip
-except:
-    pass
-
-import sys
-
 from nose.tools import eq_
 
-from match import Match
+import match
+from match.Match import _cleanup_text, _match_by_edit_distance
 
 
 # Excepts from blog entries from the CBC/Corporati corpus: http://ynada.com/cbc-corporati/
@@ -190,12 +184,118 @@ gold_results_all_sentences = [[(0, 64, u"It'? ?s hard to believe but Dreamforce 
                               [(5392, 5430, u'\xb7         Am\xe9lioration de la stabilit\xe9')],
                               [(5432, 5563, u'Les prochaines \xe9tapes visent un lancement mondial \xe0 San Diego lors du prochain Microsoft Management Summit (MMS), en mars prochain.')]]
 
-def test_match_full_sentences():
+
+def test_match_full_sentences_regression():
+    ''' Regression tests for match.match() '''
     for (test_sentence, gold_result) in zip(test_sentences, gold_results_all_sentences):
-        sys.stderr.write("gold: " + str(gold_result) + "\n")
-        sys.stderr.write("test: " + str(test_sentence) + "\n")
-        if sys.version_info[0] >= 3:
-            eq_(gold_result, Match.match(test_text, test_sentence))
-        else:
-            eq_(gold_result, Match.match(test_text.decode("utf8"), test_sentence))
-        sys.stderr.write("\n")
+        current = match.match(test_text, test_sentence)
+        message = "test: {}\ngold: {}\ncurrent: {}\n".format(
+            str(test_sentence), str(gold_result), str(current))
+        yield (eq_, current, gold_result, message)
+
+
+def test_match_lines_with_tokenized_sentences():
+    ''' Unit test for match.match_lines() where each thing to be matched is a tokenized sentence '''
+    # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
+    original_text = """Taking it easy now that my knees have liquid in them...hence the pain... Damn straight I'll be ready for my next sprint...this Sunday!  People are still talking about my @reply to @bradiewebb saying I hate him cause he didn't reply. It was a joke, douche bags.  RT@beeeebzy: RT @ayshneck: jimmy rollins did in fact figure out mo. he figured out that he can't hit him. NEW PREDICTION Phils in 08  @jayssaalexia RT pois eh;tem que juntar o povo do twitter,e quando tiver passando panico.Todo mundo perguntar se vo falar do #zina...  @cullenluv hey lady u still on? How's ur nite going so far?  @dhollings i want to be together. lets work it out ok. lets be a family again. it's okay. I promise.  @MsShortSale ....Open House in NMB 11-01-09, Quad-Condo Complex,$2,399,000.00 for all (4) or will sell individually.  Ã©â€¢Â·Ã£Ââ€žÃ©â€“â€œÃ¤ÂºÂºÃ£ÂÂ«Ã¤Â¼Å¡Ã£ÂÂ£Ã£ÂÂ¦Ã£Ââ€žÃ£ÂÂªÃ£Ââ€žÃ£Ââ€ºÃ£Ââ€žÃ£Ââ€¹Ã£â‚¬ÂÃ¤ÂºÂºÃ©â€“â€œÃ£â€šâ€™Ã§â€ºÂ´Ã¦Å½Â¥Ã¨Â¦â€¹Ã£â€šâ€¹Ã£ÂÂ®Ã£ÂÅ’Ã¥â€¡â€žÃ£ÂÂÃ¦â‚¬â€“Ã£ÂÂÃ¦â€žÅ¸Ã£ÂËœÃ£â€šâ€¹Ã£â‚¬â€š"""
+    tokenized_sentences = [["Taking", "it", "easy", "now", "that", "my", "knees", "have", "liquid", "in", "them", "...", "hence", "the", "pain", "..."],
+                           ["Damn", "straight", "I", "'ll", "be", "ready", "for", "my", "next", "sprint", "...", "this", "Sunday", "!"],
+                           ["@", "jayssaalexia", "RT", "pois", "eh", ";", "tem", "que", "juntar", "o", "povo", "do", "twitter", ",", "e", "quando", "tiver", "passando", 
+                            "panico", ".", "Todo", "mundo", "perguntar", "se", "vo", "falar", "do", "#", "zina", "..."],
+                           ["Open", "House", "in", "NMB", "11-01-09", ",", "Quad-Condo", "Complex", ",", "$2,399,000.00", "for", "all", "-LRB-", "4", "-RRB-", "or", "will",
+                            "sell", "individually", "."]]
+    gold = [(0, 72, 'Taking it easy now that my knees have liquid in them...hence the pain...'),
+            (73, 134, "Damn straight I'll be ready for my next sprint...this Sunday!"),
+            (396, 529,
+             '@jayssaalexia RT pois eh;tem que juntar o povo do twitter,e quando tiver passando panico.Todo mundo perguntar se vo falar do #zina...'),
+            (711, 810, 'Open House in NMB 11-01-09, Quad-Condo Complex,$2,399,000.00 for all (4) or will sell individually.')]
+    current = match.match_lines(original_text, tokenized_sentences)
+    eq_(current, gold)
+
+
+def test_match_lines_with_single_words():
+    ''' Unit test for match.match_lines() where each thing to be matched is a single word '''
+    # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
+    original_text = """Global Voices Online Â» Alex Castro: A liberal, libertarian and libertine Brazilian blogger http://ff.im/-6izrC  Do the Conservatives Have a Death Wish? http://bit.ly/323Kq5  RT @Joshuabradenp: The Conservative stands on the shoulders of our Founders... While the Liberal stands on their throats! #p2 #ucot @JoeNBC  RE: @tvnewser Overall excellence? All this is about... is having Liberals handing out their awards to NBC, the biggest Lâ€¦ http://disq.us/px0  I thought conservatives we're champions of personal responsibility, the crux of this msg. Maybe they just hate the messenger? #hypocrisy"""
+    gold = [(39, 46, 'liberal'), (198, 210, 'Conservative'), (264, 271, 'Liberal')]
+    current = match.match_lines(original_text, ["liberal", "conservative"])
+    eq_(current, gold)
+
+
+def test_match_without_supplying_cleaned_text_single_word():
+    ''' Unit test for match.match() without user-supplied cleaned text, matching on a single word '''
+    # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/ 
+    original_text = """LIVING MY LIFE ONE STEP AT A TIME~NO NEED TO RUSH WHEN YOU HAVE PLENTY OF TIME~DON'T WORRY OVER THOSE WHO NEVER MADE IT TO YA FUTURE THE  @SpaceAstro the whole state of Arizona doesn't do Daylight Savings Time  #News #Environment #Nature Turmoil from climate change poses security risks http://economictimes.indiatimes.com/articleshow/5175652.cms  celebrates Halloween and time-travel with good friends, a scary movie, clingy cats, and hazelnut spice rum. Adieu, October; hello, November!  Working on my first video for the new #youtube channel. It's definitely going to be an acoustic cover of Times Like These - Foo Fighters #ff  of Beastly Behavior Sometimes the PEN is mightier than the sword or my tongue is sharper than my gun (but NOT always) When your ready to"""
+    # see issue #6 for a discussion about how to handle matches on portions of hyphenated words
+    gold = [(29, 33, 'TIME'), (74, 78, 'TIME'), (205, 209, 'Time'), (373, 377, 'time')]
+    current = match.match(original_text, "time")
+    eq_(current, gold)
+
+
+def test_match_supplying_cleaned_text_single_word():
+    ''' Unit test for match.match() with user-supplied cleaned text, matching on a single word '''
+    # text from https://www.nytimes.com/2019/09/24/science/cats-humans-bonding.html
+    original_text = """Dogs are man’s best friend. They’re sociable, faithful and obedient. Our relationship with cats, on the other hand, is often described as more transactional. Aloof, mysterious and independent, cats are with us only because we feed them.
+
+Or maybe not. On Monday, researchers reported that cats are just as strongly bonded to us as dogs or infants, vindicating cat lovers across the land.
+
+“I get that a lot — ‘Well, I knew that, I know that cats like to interact with me,’” said Kristyn Vitale, an animal behavior scientist at Oregon State University and lead author of the new study, published in Current Biology. “But in science, you don’t know that until you test it.”"""
+    
+    cleaned_text = """Dogs are man's best friend. They're sociable, faithful and obedient. Our relationship with cats, on the other hand, is often described as more transactional. Aloof, mysterious and independent, cats are with us only because we feed them.
+
+Or maybe not. On Monday, researchers reported that cats are just as strongly bonded to us as dogs or infants, vindicating cat lovers across the land.
+
+\"I get that a lot - 'Well, I knew that, I know that cats like to interact with me,'\" said Kristyn Vitale, an animal behavior scientist at Oregon State University and lead author of the new study, published in Current Biology. "But in science, you don’t know that until you test it.\""""
+    gold = [(91, 95, 'cats'), (193, 197, 'cats'), (289, 293, 'cats'), (441, 445, 'cats')]
+    current = match.match(original_text, "cats", clean_text=cleaned_text)
+    eq_(current, gold)
+
+
+def test_match_without_supplying_cleaned_text_tokenized_phrase():
+    ''' Unit test for match.match() with no user-supplied cleaned text, matching on a tokenized phrase '''
+    # https://www.poetryfoundation.org/poems/47247/in-just
+    original_text = """in Just-\nspring          when the world is mud-\nluscious the little\nlame balloonman\n\nwhistles          far          and wee\n\nand eddieandbill come\n
+running from marbles and\npiracies and it's\nspring\n\nwhen the world is puddle-wonderful\n\nthe queer\nold balloonman whistles\nfar          and             wee\nand bettyandisbel come dancing\n\nfrom hop-scotch and jump-rope and\n\nit's\nspring\nand\n\n         the\n\n                  goat-footed\n\nballoonMan          whistles\nfar\nand\nwee"""
+    # see issue #7
+    tokenized_phrase = ["marbles", "and", "piracies"]
+    gold = [(161, 181, 'marbles and\npiracies')]
+    current = match.match(original_text, tokenized_phrase)
+    eq_(current, gold)
+
+
+def test_match_supplying_cleaned_text_tokenized_phrase():
+    ''' Unit test for match.match() with no supplied cleaned text, matching on a tokenized phrase '''
+    # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
+    original_text = """I refuse to be a Socialist!! I had fun last night thanks Court! ... http://lnk.ms/3DZ1C  Itâ€™s called â€œcommunism,â€ folks. http://bit.ly/RedFL"""
+    cleaned_text = """I refuse to be a Socialist!! I had fun last night thanks Court! ... http://lnk.ms/3DZ1C  It's called \"communism,\" folks. http://bit.ly/RedFL"""
+    tokenized_phrase = ["It", "'s", "called", '"', "communism", ",", '"']
+    gold = [(89, 113, 'Itâ€™s called â€œcommuni')]  # TODO: obviously not quite right...consider what can be done
+    current = match.match(original_text, tokenized_phrase, clean_text=cleaned_text)
+    eq_(current, gold)
+
+
+def test_untokenize():
+    ''' Unit test for untokenize() '''
+    # from the same corpus as the regression tests
+    original_text = "Chapter two: Enter the monkeyMosaic Monkey decided to take down all the demons in the jungle to become the King of the jungle. Kazaaaaa! !! (* inspired by Bruce lee: enter the dragon )************************************************************************************Recently, i came across a advertisement on a bus stop, it wrote this \\No one can survive on the diets of hope! \ So true. ... ..Who can? ?”"
+    gold = 'Chapter\\s+two:\\s+Enter\\s+the\\s+monkeyMosaic\\s+Monkey\\s+decided\\s+to\\s+take\\s+down\\s+all\\s+the\\s+demons\\s+in\\s+the\\s+jungle\\s+to\\s+become\\s+the\\s+King\\s+of\\s+the\\s+jungle.\\s+Kazaaaaa!!!\\s+(\\\\*\\s+inspired\\s+by\\s+Bruce\\s+lee:\\s+enter\\s+the\\s+dragon\\s+)\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\*\\\\******************************************************Recently,\\s+i\\s+came\\s+across\\s+a\\s+advertisement\\s+on\\s+a\\s+bus\\s+stop,\\s+it\\s+wrote\\s+this \\No\\s+one\\s+can\\s+survive\\s+on\\s+the\\s+diets\\s+of\\s+hope! \\\\s+So\\s+true.\\s+[\\.…]{1,3}..Who\\s+can?\\s+?”'
+    current = match.untokenize(original_text)
+    eq_(current, gold)
+
+
+def test_cleanup_text():
+    ''' Unit test for _cleanup_text() '''
+    # symbols from the sidebar of https://en.wikipedia.org/wiki/Quotation_mark
+    original_text = "“ ”   \" \" ‘ ’   ' ' « » 「 」[ ]  ( )  { }  ⟨ ⟩ ,  ،  、‒  –  —  ― …  ...  . . .  ⋯  ᠁  ฯ ‹ ›  « » ‘ ’  “ ”  ' '  " " /  ⧸  ⁄ · ‱ • † ‡ ⹋  ° ” 〃¡ ¿ ※ × № ÷ º ª % ‰ ¶ ± ∓ ′  ″  ‴ § ‖  ¦ © ð ℗ ® ℠ ™ ¤ ؋ ​₳ ​ ฿ ​₿ ​ ₵ ​¢ ​₡ ​₢ ​ $ ​₫ ​₯ ​֏ ​ ₠ ​€ ​ ƒ ​₣ ​ ₲ ​ ₴ ​ ₭ ​ ₺ ​₾ ​ ₼ ​ℳ ​₥ ​ ₦ ​ ₧ ​₱ ​₰ ​£ ​ å å å ​﷼ ​៛ ​₽ ​₹ ₨ ​ ₪ ​ ৳ ​₸ ​₮ ​ ₩ ​ ¥ ​å ⁂ ❧ ☞ ‽ ⸮ ◊ ⁀"
+    gold = '"\u2009"   "\u2009" \'\u2009\'   \'\u2009\' « » 「 」[ ]  ( )  { }  ⟨ ⟩ ,  ،  、‒  -  —  ― …  ...  . . .  ⋯  ᠁  ฯ ‹ ›  « » \' \'  " "  \' \'   /  ⧸  ⁄ · ‱ • † ‡ ⹋  ° " 〃¡ ¿ ※ × № ÷ º ª % ‰ ¶ ± ∓ ′  ″  ‴ § ‖  ¦ © ð ℗ ® ℠ ™ ¤ ؋ \u200b₳ \u200b ฿ \u200b₿ \u200b ₵ \u200b¢ \u200b₡ \u200b₢ \u200b $ \u200b₫ \u200b₯ \u200b֏ \u200b ₠ \u200b€ \u200b ƒ \u200b₣ \u200b ₲ \u200b ₴ \u200b ₭ \u200b ₺ \u200b₾ \u200b ₼ \u200bℳ \u200b₥ \u200b ₦ \u200b ₧ \u200b₱ \u200b₰ \u200b£ \u200b å å å \u200b﷼ \u200b៛ \u200b₽ \u200b₹ ₨ \u200b ₪ \u200b ৳ \u200b₸ \u200b₮ \u200b ₩ \u200b ¥ \u200bå ⁂ ❧ ☞ ‽ ⸮ ◊ ⁀'
+    current = _cleanup_text(original_text)
+    eq_(current, gold)
+
+
+def test_match_by_edit_distance():
+    ''' Unit test for _match_by_edit_distance() '''
+    # data from the Twitter Political Corpus: https://www.usna.edu/Users/cs/nchamber/data/twitter/
+    original_text = "Cant believe Barack Obama & his \"I dont want them to do a lot of talking. I dont mind cleanin up the mess\" WTF! F*#@ you Obama, shame on you"
+    current = _match_by_edit_distance(original_text, "Can't")
+    eq_(current, "Cant")
+    
