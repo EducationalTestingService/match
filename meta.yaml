@@ -5,6 +5,10 @@ package:
 source:
   git_url: https://github.com/EducationalTestingService/match.git
 
+build:
+  number: 1
+  noarch: python
+
 requirements:
   build:
     - python
