@@ -99,7 +99,7 @@ def untokenize(text):
     step2a = re.sub(r'\.\.\. *', r'[\.…]{1,3}', step2, re.U)
 
     step3 = re.sub(r' \\*([.,:;?!%]+)([ \'"`\*])', r"\1\2", step2a)
-    step4 = re.sub(r' \\*([,:;?!%]+)$', r'\s*\\' + r"\1", step3)
+    step4 = re.sub(r' \\*([,:;?!%]+)$', r'\\s*\\' + r"\1", step3)
 
     step5 = re.sub(r" '", r"'", step4)
     step5 = re.sub(r" n't", r"n't", step5)
@@ -111,7 +111,7 @@ def untokenize(text):
 
     step8 = re.sub(r' \*$', r'', step7)
 
-    step9 = re.sub(r' ([^\\\*\+])', r'\s+\1', step8)
+    step9 = re.sub(r' ([^\\\*\+])', r'\\s+\1', step8)
     step9 = re.sub(r'\\s[\+\*]$', r'', step9)
 
     return step9
