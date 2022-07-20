@@ -14,7 +14,7 @@ def requirements():
 
 
 setup(name='match',
-      version='0.3.0',
+      version='0.3.1',
       description=(''),
       long_description=readme(),
       keywords='tokenization',
@@ -29,8 +29,7 @@ setup(name='match',
           'Operating System :: POSIX',
           'Operating System :: Unix',
           'Operating System :: MacOS',
-          'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3'
       ],
       packages=['match'],
       install_requires=requirements()
