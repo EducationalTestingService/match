@@ -17,12 +17,12 @@ build:
 {% block requirements -%}
 requirements:
   build:
-    - python >=3.4
+    - python >=3.7
     {% for req in data.get('install_requires', []) -%}
     - {{(req.replace(">", " >") if ">" in req else req.replace("==", " "))}}
     {% endfor %}
   run:
-    - python >=3.4
+    - python >=3.7
     {% for package in resolved_packages('build') -%}
     - {{ package }}
     {% endfor %}
