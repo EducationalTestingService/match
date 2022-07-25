@@ -1,0 +1,12 @@
+image: continuumio/miniconda3:latest
+
+stages:
+  - test
+
+runtest:
+  before_script:
+    - pip install -r requirements.txt
+    - pip install coverage
+  script:
+    - nosetests --with-coverage --cover-package=match
+  stage: "test"
