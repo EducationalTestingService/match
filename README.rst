@@ -3,7 +3,7 @@ match
 
 |Build Status|
 
-|Latest Version|\ |Downloads|
+|Latest Conda Version|\ |Latest PyPI Version|\ |Python Versions|
 
 The purpose of the module ``Match`` is to get the offsets (as well as
 the string between those offsets, for debugging) of a cleaned-up,
@@ -64,10 +64,10 @@ For convenience, a function called ``match_lines()`` is provided:
 
 .. code:: python
 
-   In [8]: match.match_lines(original_text, [ 
-      ...: ['-LRB-', 'and', 'do', 'weird', 'stuff', 'with', 'punctuation', '-RRB-'], 
-      ...: ['I', 'am', 'writing', 'a', 'letter', '!'], 
-      ...: "I" 
+   In [8]: match.match_lines(original_text, [
+      ...: ['-LRB-', 'and', 'do', 'weird', 'stuff', 'with', 'punctuation', '-RRB-'],
+      ...: ['I', 'am', 'writing', 'a', 'letter', '!'],
+      ...: "I"
       ...: ])
    Out[8]:
    [(0, 1, 'I'),
@@ -80,16 +80,12 @@ The values returned will always be sorted by their offsets.
 Installation
 ------------
 
-``pip install match``, or for Mac OS X and 64-bit Linux:
-
-::
-
-   $ conda install -c dmnapolitano match
+``pip install match`` or ``conda install -c ets match``
 
 Requirements
 ------------
 
--  Python >= 3.4
+-  Python >= 3.8
 -  `nltk <http://www.nltk.org>`__
 -  `regex <https://pypi.python.org/pypi/regex>`__
 
@@ -98,9 +94,11 @@ Documentation
 
 `Here! <match>`__.
 
-.. |Build Status| image:: https://travis-ci.org/EducationalTestingService/match.svg?branch=master
-   :target: https://travis-ci.org/EducationalTestingService/match
-.. |Latest Version| image:: https://img.shields.io/pypi/v/match.svg
-   :target: https://pypi.python.org/pypi/match/
-.. |Downloads| image:: https://img.shields.io/pypi/dm/match.svg
+.. |Build Status| image:: https://github.com/EducationalTestingService/match/actions/workflows/python-test.yml/badge.svg
+   :target: https://github.com/EducationalTestingService/match/actions/workflows/python-test.yml/
+.. |Latest Conda Version| image:: https://img.shields.io/conda/v/ets/match
+   :target: https://anaconda.org/ets/match
+.. |Latest PyPI Version| image:: https://img.shields.io/pypi/v/match
+   :target: https://pypi.org/project/match/
+.. |Python Versions| image:: https://img.shields.io/pypi/pyversions/match
    :target: https://pypi.python.org/pypi/match/
