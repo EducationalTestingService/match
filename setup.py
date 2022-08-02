@@ -15,7 +15,7 @@ def requirements():
 
 setup(name='match',
       version='0.3.1',
-      description=(''),
+      description=('Match tokenized words and phrases within the original, untokenized, often messy, text.'),
       long_description=readme(),
       keywords='tokenization',
       url='https://github.com/EducationalTestingService/match',
@@ -29,7 +29,9 @@ setup(name='match',
           'Operating System :: POSIX',
           'Operating System :: Unix',
           'Operating System :: MacOS',
-          'Programming Language :: Python :: 3'
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
       ],
       packages=['match'],
       install_requires=requirements()
