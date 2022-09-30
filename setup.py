@@ -21,6 +21,8 @@ setup(name='match',
       url='https://github.com/EducationalTestingService/match',
       author='Diane Napolitano',
       author_email='dmnapolitano@gmail.com',
+      maintainer='Tamar Lavee',
+      maintainer_email='tlavee@ets.org',
       classifiers=[
           'License :: OSI Approved :: Apache Software License',
           'Topic :: Text Processing',
