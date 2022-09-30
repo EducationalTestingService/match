@@ -29,7 +29,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install nose
+        pip install nose2
         pip install coverage
     - name: Test
       run: |
-        nosetests --with-coverage --cover-package=match
+        nose2 --with-coverage --coverage match
