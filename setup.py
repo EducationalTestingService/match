@@ -14,7 +14,7 @@ def requirements():
 
 
 setup(name='match',
-      version='0.3.1',
+      version='0.3.2',
       description=('Match tokenized words and phrases within the original, untokenized, often messy, text.'),
       long_description=readme(),
       keywords='tokenization',
