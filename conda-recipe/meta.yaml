@@ -8,7 +8,7 @@ source:
   path: ..
 
 build:
-  number: 0
+  number: 1
   noarch: python
   script:
     - cd $SRC_DIR
@@ -19,7 +19,7 @@ requirements:
     - python
     - pip
   run:
-    - python >=3.8,<3.10.0a0
+    - python >=3.8
     - nltk
     - regex
 
